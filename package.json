@@ -1,0 +1,70 @@
+{
+  "name": "dsh-github-copilot-models",
+  "version": "0.0.0",
+  "private": true,
+  "description": "GitHub Copilot for DeepSeek Harness: sign in by browser device code or a personal access token, and use the models of your Copilot account.",
+  "homepage": "https://github.com/NangWeiLun/dsh-github-copilot-models#readme",
+  "bugs": {
+    "url": "https://github.com/NangWeiLun/dsh-github-copilot-models/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NangWeiLun/dsh-github-copilot-models.git"
+  },
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "locale/*.json"
+  ],
+  "engines": {
+    "dsh": ">=0.2.2-rc.1 <0.3.0-0",
+    "node": ">=24"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-renderer",
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node --test \"test/unit/**/*.test.ts\"",
+    "test:contract": "node --test --test-concurrency=1 \"test/contract/**/*.test.ts\"",
+    "check": "npm run typecheck && npm test && npm run build",
+    "prepack": "npm run build",
+    "dev:host": "node scripts/dev-host.mjs"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/dsh-llm": ">=0.2.2-rc.1 <0.3.0-0",
+    "@deepseek-ai/dsh-llm-pi-ai": ">=0.2.2-rc.1 <0.3.0-0",
+    "@deepseek-ai/schemastery": "^3.18.5",
+    "@earendil-works/pi-ai": "^1.4.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/dsh-llm": "0.2.2-rc.1",
+    "@deepseek-ai/dsh-llm-pi-ai": "0.2.2-rc.1",
+    "@deepseek-ai/schemastery": "3.18.5",
+    "@earendil-works/pi-ai": "1.4.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "esbuild": "^0.28.2",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "GitHub Copilot モデル",
+    "description": "ブラウザでのコード入力または個人用アクセストークンで GitHub Copilot にログインし、Copilot アカウントのモデルを DSH で使用できます。"
+  }
+}

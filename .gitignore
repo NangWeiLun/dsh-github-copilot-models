@@ -1,0 +1,25 @@
+# Secrets
+.env
+
+# Saved API responses (evidence, may hold account data)
+schema/
+
+# Reference repos (each is its own git repo)
+repos/
+
+node_modules/
+
+# Build output (built from src/ by `npm run build`)
+lib/
+
+# Workspace-local npm cache, for shells where the global npm cache is read-only (DEVELOPMENT.md section 11)
+.npm-cache/
+
+# Scratch output of local checks
+.tmp/
+
+# Playwright MCP snapshots and console logs
+.playwright-mcp/
+
+# DSH agent code index (rebuilt by the code tools)
+.dsh-code-index/

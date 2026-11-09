@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "GitHub Copilot 模型",
+    "description": "通过浏览器验证码或个人访问令牌登录 GitHub Copilot，并在 DSH 中使用你的 Copilot 账号的模型。"
+  }
+}

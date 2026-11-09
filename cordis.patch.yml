@@ -1,0 +1,6 @@
+# Bundle patch: inserts this plugin's own row and nothing else.
+# Never insert a service the base bundle already mounts, and never turn off
+# the shared llm-pi-ai row (docs/packaging.md, section 1).
+- insert:
+    - id: github-copilot-models
+      name: dsh-github-copilot-models
