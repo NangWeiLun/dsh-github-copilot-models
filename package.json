@@ -1,6 +1,6 @@
 {
   "name": "dsh-github-copilot-models",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "GitHub Copilot for DeepSeek Harness: sign in by browser device code or a personal access token, and use the models of your Copilot account.",
   "keywords": [
     "dsh",
