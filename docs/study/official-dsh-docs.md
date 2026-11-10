@@ -1,6 +1,8 @@
 # Official DSH plugin docs
 
-Where DSH's own plugin documentation is, and a digest of its rules. Read on DSH 0.2.1-rc.2 (2026-10-28 to 2026-10-30); not re-checked since. How this plugin applies them is in [packaging.md](../packaging.md); the pitfall numbers refer to [ref-similar-plugins.md](ref-similar-plugins.md#7-pitfalls) section 7.
+Snapshot of DSH's plugin documentation, taken between 2026-10-28 and 2026-10-30 against DSH 0.2.1-rc.2.
+
+Where DSH's own plugin documentation is, and a digest of its rules. How this plugin applies them is in [packaging.md](../packaging.md); the pitfall numbers refer to [ref-similar-plugins.md](ref-similar-plugins.md#7-pitfalls) section 7.
 
 ## 1. Where the docs are
 
@@ -22,7 +24,7 @@ Where DSH's own plugin documentation is, and a digest of its rules. Read on DSH 
 
 The skill relies on the `cordis_inspect_list`, `cordis_inspect_query` and `plugin_manager` tools, which exist only in DSH's Creator mode. Elsewhere, read the package READMEs and `lib/types/**/*.d.ts`; installed packages ship `lib/` only, not `src/`.
 
-**Public repo `deepseek-ai/deepseek-harness`, folder `docs/`.** Read: `cookbook/adding-an-llm-adapter.md`, `cookbook/adding-a-settings-card.md`, `defensive-patterns/package-surface.md`, `upgrade-guide/v0.2.1-rc.4/model-listing-refresh/guide.md` (DeepSeek routes and `ModelListingCache`; no effect unless the plugin uses that cache). Not read yet: `cordis-tutorial/`, the other `defensive-patterns/` and `cookbook/` pages, `testing.md`, `development.md`, `cordis-primer.md`, `capability-seams.md`, and the other upgrade guides from `v0.2.0-rc.2` on. The installed Cordis README links `docs/tutorials/build-a-plugin.md`, which is not in the public repo; it has `docs/cordis-tutorial/` instead.
+**Public repo `deepseek-ai/deepseek-harness`, folder `docs/`.** Read: `cookbook/adding-an-llm-adapter.md`, `cookbook/adding-a-settings-card.md`, `defensive-patterns/package-surface.md`, `upgrade-guide/v0.2.1-rc.4/model-listing-refresh/guide.md` (DeepSeek routes and `ModelListingCache`; no effect unless the plugin uses that cache). Not read: `cordis-tutorial/`, the other `defensive-patterns/` and `cookbook/` pages, `testing.md`, `development.md`, `cordis-primer.md`, `capability-seams.md`, and the other upgrade guides from `v0.2.0-rc.2` on. The installed Cordis README links `docs/tutorials/build-a-plugin.md`, which is not in the public repo; it has `docs/cordis-tutorial/` instead.
 
 ## 2. Digest
 

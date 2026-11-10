@@ -34,7 +34,7 @@ A matching override replaces a row's whole `config` instead of merging it (P20).
 - Packages that DSH shares with the plugin are declared in `peerDependencies`, and at their exact DSH version in `devDependencies`. DSH supplies them at run time; the development copies serve the type checker and the unit tests.
 - The peers are `@deepseek-ai/schemastery` and, for the Models adapter, `@deepseek-ai/dsh-llm`, `@deepseek-ai/dsh-llm-pi-ai` and `@earendil-works/pi-ai`.
 - For a linked plugin, DSH resolves imports of declared peers to its own copies ([models.md](design/models.md) B1). This was confirmed on `web-dev`.
-- The development versions of `@deepseek-ai/dsh-llm` and `@deepseek-ai/dsh-llm-pi-ai` (currently `0.2.2-rc.1`) move together with the DSH version in use.
+- The development versions of `@deepseek-ai/dsh-llm` and `@deepseek-ai/dsh-llm-pi-ai` (pinned to `0.2.2-rc.1`) move together with the DSH version in use.
 - The Login Host does not import DSH's service types. It declares the services it uses as small local interfaces in `src/host/ports.ts` and `src/host/context.ts` (section 5).
 
 ### Build
@@ -55,7 +55,7 @@ The plugin's `Config` holds only its own fields ([login.md](design/login.md) A1,
 The plugin is distributed on npm as `dsh-github-copilot-models`, an unscoped public package. The [README](../README.md) gives the install command.
 
 - `lib/` is not committed. `prepack` builds it into the tarball, and `prepublishOnly` runs `npm run check` before every publish.
-- Releases are published manually, with npm two-factor authentication. Publishing from GitHub Actions through [trusted publishing](https://docs.npmjs.com/trusted-publishers) becomes possible once the package exists on npm.
+- Releases are currently published manually, with npm two-factor authentication. Publishing from GitHub Actions through [trusted publishing](https://docs.npmjs.com/trusted-publishers) is proposed in [cicd.md](cicd.md).
 
 Options considered:
 
@@ -69,7 +69,7 @@ Options considered:
 
 ### How DSH checks compatibility
 
-DSH checks each plugin when a profile loads and when the plugin is installed (`evaluatePluginCompatibility` in `@deepseek-ai/dsh-app-boot`; examined and tested on DSH 0.2.1-rc.2, still present in 0.2.2-rc.1):
+DSH checks each plugin when a profile loads and when the plugin is installed (`evaluatePluginCompatibility` in `@deepseek-ai/dsh-app-boot`, as implemented in DSH 0.2.1-rc.2 and 0.2.2-rc.1):
 
 - A top-level `engines.dsh`, when present, decides alone; the peers are then ignored.
 - Without it, every `@deepseek-ai/dsh` and `@deepseek-ai/dsh-*` peer range must match.
@@ -82,7 +82,7 @@ DSH checks each plugin when a profile loads and when the plugin is installed (`e
 - `engines.dsh` is `>=0.2.2-rc.1 <0.3.0-0`, and the `@deepseek-ai/dsh-llm` and `@deepseek-ai/dsh-llm-pi-ai` peers declare the same range.
 - The lower bound is the DSH version that the type checker and the contract tests use. The upper bound, `<0.3.0-0`, also excludes the prereleases of 0.3.0.
 - The range admits DSH versions that have not been tested. The Models adapter depends on DSH internals ([models.md](design/models.md) B6), so a release within the range can still break the plugin. Run the contract tests ([DEVELOPMENT.md](../DEVELOPMENT.md#5-build-and-test), section 5) on each new DSH release before relying on it.
-- Whatever the policy, plan for one migration per DSH release: DSH published 39 versions between 2026-08-10 and 2026-10-27. A CI matrix of packed-install tests on released DSH versions is planned ([todo.md](todo.md)).
+- Whatever the policy, plan for one migration per DSH release, as DSH publishes several versions a week. Testing against DSH `latest` and `next` in CI is proposed in [cicd.md](cicd.md).
 
 Policies considered:
 
@@ -122,7 +122,7 @@ The plugin ships as one package. Open question: should web search ([search.md](d
 
 ## 5. Differences from the official guide
 
-Compared on 2026-11-02 with the [plugin guide](https://deepseek-harness.github.io/deepseek-harness/en/develop/basic/), the [reference cookbooks](https://deepseek-harness.github.io/deepseek-harness/en/reference/cookbook/adding-a-settings-card), the `cordis-plugin-development` skill shipped with DSH, and the README of DSH's Plugins page (`dsh-client-ui-plugin-manager`).
+The comparison covers the [plugin guide](https://deepseek-harness.github.io/deepseek-harness/en/develop/basic/), the [reference cookbooks](https://deepseek-harness.github.io/deepseek-harness/en/reference/cookbook/adding-a-settings-card), the `cordis-plugin-development` skill shipped with DSH, and the README of DSH's Plugins page (`dsh-client-ui-plugin-manager`).
 
 Everything not listed below follows the guide, including the bundle patch, `engines.dsh`, shared packages as peer and development dependencies, a Schemastery `Config`, registrations as effects, `ctx.get()` for optional services, `locale/*.json` in `exports` and `files`, a lazy CommonJS browser half with its text in `ctx.locale`, and the `--from-default-profile`, `dsh plugin add` and `--dump-config` commands.
 
@@ -147,12 +147,3 @@ Everything not listed below follows the guide, including the bundle patch, `engi
 | Profile | `--profile demo`, created by `dsh plugin add` on first use, with `dsh-base` only | The developer's own profile with a local link, or `web-dev`, created from the `web` template ([DEVELOPMENT.md](../DEVELOPMENT.md#3-profiles), section 3) | Testing needs the Web UI and the same plugins as the profiles users run |
 | Installation | The skill: the agent's `plugin_manager` tool. The guide: `dsh plugin add` | `dsh plugin add` | The agent's tool installs only into the agent's own profile and refuses a package that is already installed (DEVELOPMENT.md, section 3) |
 | Reload after a change | HMR reloads a plugin when its files change (with `root` set); `pnpm run dev:web` in a DSH checkout also rebuilds browser halves | Card: DSH picks up a rebuilt `lib/client.js` by itself. Host: stop `web-dev`, rebuild, start it | The base bundle runs HMR with `root: []`, so a rebuild alone does not reload the Host; a later change to the profile's patch file does ([DEVELOPMENT.md](../DEVELOPMENT.md#4-run-web-dev), section 4). The skill also requires a restart when a package's code is replaced |
-
-## 6. Decision record
-
-| Date | Decision |
-|---|---|
-| 2026-11-03 | No agent tools for Login or Models yet (section 5) |
-| 2026-11-06 | `engines.dsh` became the range `>=0.2.2-rc.1 <0.3.0-0`. It replaced an exact pin on `0.2.1-rc.5`, which made DSH 0.2.2-rc.1 skip the plugin |
-| 2026-11-08 | MIT licence; the first icon was removed |
-| 2026-11-10 | npm chosen for distribution |

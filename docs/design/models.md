@@ -59,7 +59,7 @@ Login notifies Models inside the Host of two events, and Models acts on them as 
 
 A failed lookup for an unchanged credential is not an event for Models.
 
-**Shared record.** The record DSH's `llm-pi-ai` keeps for its built-in route `github-copilot`. The plugin asks DSH for its key with `recordKeyFor('github-copilot')` from `@deepseek-ai/dsh-llm-pi-ai` (`RECORD_KEY` in `src/host/ports.ts`) instead of writing it out, so both keep sharing one login if DSH ever names its records differently (login.md B3). Decided on 2026-11-08.
+**Shared record.** The record DSH's `llm-pi-ai` keeps for its built-in route `github-copilot`. The plugin asks DSH for its key with `recordKeyFor('github-copilot')` from `@deepseek-ai/dsh-llm-pi-ai` (`RECORD_KEY` in `src/host/ports.ts`) instead of writing it out, so both keep sharing one login if DSH ever names its records differently (login.md B3).
 
 | Method | Record | Token |
 |---|---|---|
@@ -180,21 +180,19 @@ The Card shows one block per row of the row list, as received, without grouping 
 |---|---|
 | Model name | `name`, or `id` when the row has no `name` |
 | Switch | Show in picker: the toggle (rules below). A locked row shows "Cannot be served" instead. |
-| Policy | A "Policy: `<state>`" badge, amber, with `policy.state` as received, only when the row has a `policy` whose state is not `enabled`. In the observed replies (C1) every row with a policy had `enabled`, so no badge showed; an `enabled` policy and its `terms` stay in Details. Decided 2026-11-07; before, every state showed. |
-| Info | Each of the row's `info_messages` that has a `message`, as received, one line per message; amber for the code `model_pending_deprecation`, for example GPT-5.6 Terra on 2026-11-03: "GPT-5.6 Terra has a planned deprecation date of 2026-11-16." Decided 2026-11-07. |
+| Policy | A "Policy: `<state>`" badge, amber, with `policy.state` as received, only when the row has a `policy` whose state is not `enabled`. In the observed replies (C1) every row with a policy had `enabled`, so no badge showed; an `enabled` policy and its `terms` stay in Details. |
+| Info | Each of the row's `info_messages` that has a `message`, as received, one line per message; amber for the code `model_pending_deprecation`, for example GPT-5.6 Terra: "GPT-5.6 Terra has a planned deprecation date of 2026-11-16." |
 | Context and output | The sizes (rules below), on rows that can be served |
 | Prices | The prices (rules below), in a fold titled Prices, open at first |
 | Details | All fields of the row, as received, in a fold titled Details, closed at first |
 
-The folds were decided on 2026-11-07; before, the prices stood in the label column beside the sizes, and Details was a link.
-
-**Sizes.** Every limit comes from the reply. Nothing is hard-coded, and the plugin does not copy DSH's compaction formula (B5). Decided on 2026-11-05: a Context row and an Output row on every row that can be served, each a field with buttons that fill it in, and one Save. They replace radio buttons for Default and Long, which offered no size in between and no other output size. A first version of the same day, where a preset saved at once, was dropped: one Save for both fields is clearer, and a refused size showed far from the fields.
+**Sizes.** Every limit comes from the reply. Nothing is hard-coded, and the plugin does not copy DSH's compaction formula (B5). Every row that can be served has a Context row and an Output row, each a field with buttons that fill it in, and one Save. Unlike radio buttons for Default and Long, the fields also take sizes in between and other output sizes. Buttons do not save at once: one Save for both fields is clearer, and a refused size is reported next to the fields.
 - **Fields.** Each field shows the stored value, or Copilot's value when none is stored, as plain digits (`328000`):
   - **Copilot's context:** the default tier's `max_prompt_tokens` plus `max_output_tokens`, never above `max_context_window_tokens`; `max_context_window_tokens` when the default tier gives no `max_prompt_tokens`. On a two-tier row this is the Default size. On every other row of the observed long-view reply (B3) it equals `max_context_window_tokens`.
   - **Copilot's output:** `max_output_tokens`.
-  - **Digits only.** A field takes the digits 0–9 and nothing else: no separators, signs or exponents. Full-width digits (０–９, typed by Chinese and Japanese input methods) count as digits, and spaces around the digits are ignored; when you leave the field, such a value shows as it will be saved, "１２８０００" as "128000". Anything else is refused as you type with "use digits only (0–9), without separators", and stays as typed. The reason: `,` and `.` mean thousands in some languages and decimals in others, so a German "128.000" (128 thousand) was read as 128 and could be saved. Decided on 2026-11-08, as was keeping full-width digits and showing them as 0–9 once you leave the field.
+  - **Digits only.** A field takes the digits 0–9 and nothing else: no separators, signs or exponents. Full-width digits (０–９, typed by Chinese and Japanese input methods) count as digits, and spaces around the digits are ignored; when the user leaves the field, such a value shows as it will be saved, "１２８０００" as "128000". Anything else is refused as the user types, with "use digits only (0–9), without separators", and stays as typed. The reason: `,` and `.` mean thousands in some languages and decimals in others, so a German "128.000" (128 thousand) would otherwise be read as 128 and saved.
 - **Buttons.** Each field has a **Default** button, which puts Copilot's value in the field. On a two-tier row, Context also has **Long**, which puts the Long size in it: the long tier's `max_prompt_tokens` plus `max_output_tokens`, never above `max_context_window_tokens`. VS Code's Copilot Chat derives its two sizes from the same fields. A button only fills its field; nothing is stored until Save. A button shows as pressed while its field holds its value, an empty field counting as Copilot's value; with any other value, none is pressed.
-- **Save.** Save stores both fields together. A field that is empty or holds Copilot's value is not stored, so that size follows Copilot's value, also after a later reply changes it. When neither field is stored, the entry is removed. Save is disabled until the fields differ from what is stored, and while a value is not digits only, is not a positive integer, or the output is not below the context: the Card checks these as you type. Long with a smaller output is refused like any other pair: for Claude Sonnet 5.5, Long with output 32,000 gives 1,000,000 − 32,000 = 968,000, above its prompt limit of 936,000. A stored Long size is a plain number: a later reply that changes the Long size does not change it, and it is checked like any stored size.
+- **Save.** Save stores both fields together. A field that is empty or holds Copilot's value is not stored, so that size follows Copilot's value, also after a later reply changes it. When neither field is stored, the entry is removed. Save is disabled until the fields differ from what is stored, and while a value is not digits only, is not a positive integer, or the output is not below the context: the Card checks these as the user types. Long with a smaller output is refused like any other pair: for Claude Sonnet 5.5, Long with output 32,000 gives 1,000,000 − 32,000 = 968,000, above its prompt limit of 936,000. A stored Long size is a plain number: a later reply that changes the Long size does not change it, and it is checked like any stored size.
 - **Checks.** A typed value must be a positive integer, and the pair in use, where an empty field counts as Copilot's value, must pass these checks:
   - context ≤ `max_context_window_tokens`;
   - output ≤ `max_output_tokens`;
@@ -205,7 +203,7 @@ The folds were decided on 2026-11-07; before, the prices stood in the label colu
 - Stored sizes are checked again each time the model list is built (A7). A stored size that no longer passes is not used: Copilot's values apply, and the Card shows the check that failed beside Save.
 - The context size changes nothing on the wire: only the window DSH sees, and so when DSH compacts. The output size is also a request's output cap when DSH sets none (B5).
 
-**Prices.** When the row has `billing`, the Card shows the prices as a small table in the Prices fold, captioned "AI credits per `<batch_size>` tokens" (B3). One row per tier, the default tier first, named **Default** and **Long** like the size buttons, or by its name as received for any other tier. The columns are "Prompt up to" (the tier's `max_prompt_tokens`), Input, Output, Cache read, Cache write and Cache write 1h (`input_price`, `output_price`, `cache_read_price`, `cache_write_price`, `cache_write_1h_price`), each only when some tier gives it; a tier without a value leaves its cell empty. Prices keep their value, written as plain numbers in every language: no thousands separators and a dot for decimals (`2000`, `0.25`; ui.md U4). Rows that cannot be served keep their prices. When every price of the row is `0` (such rows have `batch_size` `0`, C1), there is nothing to fold: the Card shows the title and "All prices are 0" on one line. Without `billing`, or without any price in it, that line says "Price not reported by Copilot". Prices are shown only; they do not reach DSH (A7). The table replaced one text line per tier, decided on 2026-11-07.
+**Prices.** When the row has `billing`, the Card shows the prices as a small table in the Prices fold, captioned "AI credits per `<batch_size>` tokens" (B3). One row per tier, the default tier first, named **Default** and **Long** like the size buttons, or by its name as received for any other tier. The columns are "Prompt up to" (the tier's `max_prompt_tokens`), Input, Output, Cache read, Cache write and Cache write 1h (`input_price`, `output_price`, `cache_read_price`, `cache_write_price`, `cache_write_1h_price`), each only when some tier gives it; a tier without a value leaves its cell empty. Prices keep their value, written as plain numbers in every language: no thousands separators and a dot for decimals (`2000`, `0.25`; ui.md U4). Rows that cannot be served keep their prices. When every price of the row is `0` (such rows have `batch_size` `0`, C1), there is nothing to fold: the Card shows the title and "All prices are 0" on one line. Without `billing`, or without any price in it, that line says "Price not reported by Copilot". Prices are shown only; they do not reach DSH (A7).
 
 **Toggle state**, decided in this order:
 1. `locked` when the row has a reason code (A10). The Card shows the code.
@@ -213,7 +211,7 @@ The folds were decided on 2026-11-07; before, the prices stood in the label colu
 3. The stored `modelVisibility[id]`, when present.
 4. `on` when `model_picker_enabled` is `true`, otherwise `off`.
 
-**Order.** Rows without a reason code first, then locked rows. Within each group, the order of the reply. The locked rows sit in one fold after the others, titled with their count ("19 models cannot be served"; "1 model cannot be served"), closed at first, and open at first when no row can be served. Decided on 2026-11-07, to shorten the list: in the observed replies most rows were locked (C1).
+**Order.** Rows without a reason code first, then locked rows. Within each group, the order of the reply. The locked rows sit in one fold after the others, titled with their count ("19 models cannot be served"; "1 model cannot be served"), closed at first, and open at first when no row can be served. The fold shortens the list: in the observed replies most rows are locked (C1).
 
 **Rows no longer returned.** After a successful fetch, an id with a stored choice (A5) that is not in the row list is shown as "no longer returned", with its stored choices. They are kept until the user clears them. While the row list is empty, no id is shown as no longer returned.
 
@@ -423,8 +421,8 @@ Headers of a model request, in merge order (a later entry overrides an earlier o
 | `maxRequestImageBytes` | `20 * 1024 * 1024` |
 | `requestImagePixelBudget` | `2048 * 2048` |
 | `requestImageMaxBytes` | `1024 * 1024` |
-| `maxRequestImages` | `50`, DSH's default; required since DSH 0.2.2-rc.1 (open point 14) |
-| `imageOffloadCountQuantum` | `10`, DSH's default; required since DSH 0.2.2-rc.1 |
+| `maxRequestImages` | `50`, DSH's default; required in DSH 0.2.2-rc.1 (open point 14) |
+| `imageOffloadCountQuantum` | `10`, DSH's default; required in DSH 0.2.2-rc.1 |
 
 **5. Adapter and registration**, inside `ctx.effect`:
 
@@ -447,9 +445,8 @@ const registration = ctx.llm.registerAdapter(['github-copilot-models'], adapter)
 
 - DSH's model picker lists the switched-on models under the profile's display name, with the effort choices derived from A7.
 - The context size is set on the Card. The picker has no control for it (B8).
-- **Label.** Each model carries a label in the picker, beside its name (B8): its context size as DSH uses it, written compactly (`328K`, `1M`, `1.05M`), in the neutral tone; or "Deprecating" in the warning tone, in DSH's eight languages (Chinese "即将弃用", Japanese "廃止予定", German "Auslaufend", and so on; ui.md U4), while the row has the info message `model_pending_deprecation` (A4). The size follows the Card: a stored size or Long changes the label at the next republish, with no restart and no request. The date of a retirement stays on the Card, because Copilot gives it only inside the message text.
+- **Label.** Each model carries a label in the picker, beside its name (B8, open point 11): its context size as DSH uses it, written compactly (`328K`, `1M`, `1.05M`), in the neutral tone; or "Deprecating" in the warning tone, in DSH's eight languages (Chinese "即将弃用", Japanese "廃止予定", German "Auslaufend", and so on; ui.md U4), while the row has the info message `model_pending_deprecation` (A4). The size follows the Card: a stored size or Long changes the label at the next republish, with no restart and no request. The date of a retirement stays on the Card, because Copilot gives it only inside the message text.
 - **How.** `PiAiAdapter` lists no label, so the plugin's adapter is a subclass, `LabelledPiAiAdapter`, whose `listModels` adds the label of each model id to `PiAiAdapter`'s list. DSH's model service passes it on (`dsh-llm/lib/index.js:2086-2105`; contract tests, B9).
-- Decided on 2026-11-07 (open point 11). On 2026-11-03 the picker got no label, because its only place then was the `conversation.input.model.label` slot, which held DSH's own model label.
 
 ### A10. Errors
 
@@ -482,7 +479,7 @@ Errors are recognised by their source (HTTP status, DSH `LlmError` code), never 
 
 ### A11. Card ↔ Host
 
-Decided 2026-11-03. The Card calls the Host through exact routes under `/api/github-copilot-models/`, registered with `ctx.connection.fetch.register`, beside Login's routes (login.md A10). The types are in `src/shared/api.ts`. No route returns a token. Of the routes below, only Refresh sends a request; Login's sign-in routes also run the fetch after their lookup (A3).
+The Card calls the Host through exact routes under `/api/github-copilot-models/`, registered with `ctx.connection.fetch.register`, beside Login's routes (login.md A10). The types are in `src/shared/api.ts`. No route returns a token. Of the routes below, only Refresh sends a request; Login's sign-in routes also run the fetch after their lookup (A3).
 
 | Button or view on the Card | Route | Reply |
 |---|---|---|
@@ -525,7 +522,7 @@ With the installed pi-ai and DSH and `fetch` replaced, in the contract suite:
 
 ## B. What the plugin relies on
 
-Behaviour of DSH 0.2.2-rc.1, the pi-ai 1.5.0 it installs, and the Copilot API. Re-read against these versions on 2026-11-07; first written against DSH 0.2.1-rc.5 and pi-ai 1.4.0. Re-check this part when a version changes. File references are to the installed packages. Evidence is marked as *observed* (a real Copilot request with one Business account, between late October and early November 2026, C1), *verified offline* (run against a local HTTP server with a fake token), *read in code*, or *reported* (a third party, not verified).
+Behaviour of DSH 0.2.2-rc.1, the pi-ai 1.5.0 it installs, and the Copilot API. Re-check this part when a version changes. File references are to the installed packages. Evidence is marked as *observed* (a real Copilot request with one Business account, C1), *verified offline* (run against a local HTTP server with a fake token), *read in code*, or *reported* (a third party, not verified).
 
 ### B1. Dependencies
 
@@ -778,7 +775,7 @@ Offline tests of the behaviour in part B against the installed versions. They fa
 
 ### C1. Observed requests
 
-Behaviour observed with one Business-plan account on github.com, between late October and early November 2026:
+Behaviour observed with one Business-plan account on github.com:
 - `GET /models` without `Authorization` answers 400 "missing required Authorization header".
 - With a browser-login token, `vscode-chat` and `X-GitHub-Api-Version`, the Business host answers 200 with the long view (27 rows).
 - With a PAT and `copilot-developer-cli` (B2), the generic and Business hosts answer 200, and the Individual host answers 401 (B2). Without `X-GitHub-Api-Version` the reply has 26 rows (the default view); with `2026-06-01` or `2026-08-01` it has 27 (the long view, B4).
@@ -833,18 +830,18 @@ Items keep the numbers other sections cite (for example open point 14). All but 
 
 | # | Item | Status |
 |---|---|---|
-| 2 | Further fetch times | Decided 2026-11-03: none beyond A3. |
-| 3 | Retry after a failed fetch | Decided 2026-11-03: no retry (A2, A10). |
-| 4 | `/models` timeout | Decided 2026-11-03: 10 seconds (A2). |
-| 5 | Editor headers on `/models` | Decided 2026-11-03: none (A2). Confirmed: `/models` with the browser-login token and no editor headers answered 200. |
-| 6 | Wire order | Decided 2026-11-03: `/responses`, `/v1/messages`, `/chat/completions` (A7). Confirmed: one chat on `/responses` (GPT-5.3-Codex) and one on `/v1/messages` (Claude Haiku 4.5) answered. |
-| 7 | Rows without `max_output_tokens` | Decided 2026-11-03: locked with `NO_LIMITS` (A10). None seen. |
-| 8 | `policy.state` `disabled` | Decided 2026-11-03: shown only, toggle not locked (A4). Never seen. |
-| 9 | Display name | Decided 2026-11-03: "GitHub Copilot (plugin)" (A8), because DSH's built-in route is named "GitHub Copilot". |
-| 10 | Card ↔ Host calls | Decided 2026-11-03: exact routes beside Login's, and one Refresh (A11). |
-| 11 | Context-size badge in the picker | Decided 2026-11-03: no badge (A9). Revisited and decided 2026-11-07: since DSH 0.2.2-rc.1 an adapter can give each model a short picker label with a tone (B8). Each model shows its context size, or "Deprecating" while Copilot announces a retirement, through a subclass of `PiAiAdapter` (A9). |
-| 12 | Limits view | Decided 2026-11-03: the long view, through the version header (A2, A6). Confirmed: with the version header, Copilot served a prompt of more than 260,000 tokens to Claude Sonnet 5.5, whose default tier ends at 200,000. |
-| 13 | Size control on the Card | Decided 2026-11-05: a Context row and an Output row on every row, each a field with a Default button, and Long on a two-tier row's Context; the buttons fill the fields and one Save stores both; a field shows Copilot's value when nothing is stored (A4). |
+| 2 | Further fetch times | Decided: none beyond A3. |
+| 3 | Retry after a failed fetch | Decided: no retry (A2, A10). |
+| 4 | `/models` timeout | Decided: 10 seconds (A2). |
+| 5 | Editor headers on `/models` | Decided: none (A2). Confirmed: `/models` with the browser-login token and no editor headers answered 200. |
+| 6 | Wire order | Decided: `/responses`, `/v1/messages`, `/chat/completions` (A7). Confirmed: one chat on `/responses` (GPT-5.3-Codex) and one on `/v1/messages` (Claude Haiku 4.5) answered. |
+| 7 | Rows without `max_output_tokens` | Decided: locked with `NO_LIMITS` (A10). None seen. |
+| 8 | `policy.state` `disabled` | Decided: shown only, toggle not locked (A4). Never seen. |
+| 9 | Display name | Decided: "GitHub Copilot (plugin)" (A8), because DSH's built-in route is named "GitHub Copilot". |
+| 10 | Card ↔ Host calls | Decided: exact routes beside Login's, and one Refresh (A11). |
+| 11 | Context-size badge in the picker | Decided: in DSH 0.2.2-rc.1 an adapter can give each model a short picker label with a tone (B8). Each model shows its context size, or "Deprecating" while Copilot announces a retirement, through a subclass of `PiAiAdapter` (A9). |
+| 12 | Limits view | Decided: the long view, through the version header (A2, A6). Confirmed: with the version header, Copilot served a prompt of more than 260,000 tokens to Claude Sonnet 5.5, whose default tier ends at 200,000. |
+| 13 | Size control on the Card | Decided: a Context row and an Output row on every row, each a field with a Default button, and Long on a two-tier row's Context; the buttons fill the fields and one Save stores both; a field shows Copilot's value when nothing is stored (A4). |
 | 14 | Images per request | Open. The profile uses DSH's defaults: `maxRequestImages` 50, offloaded 10 at a time (A8). Claude refuses any image over 3000 px on a side once a request holds more than 20 images, 2000 px before 2026-10-29 (*reported*: [vision docs](https://web.archive.org/web/20260421095152/https://platform.claude.com/docs/en/build-with-claude/vision), [ClaudeDevs](https://x.com/ClaudeDevs/status/2115923973188034637)). DSH limits each image's pixels, not its sides, so such a request can fail: one with 21 images failed and one with 17 passed (*observed*). Copilot's `capabilities.limits.vision` (B3) does not settle it: `max_prompt_images` is 1 or 5, yet the request with 17 images passed, so it is probably how many images one message may attach in VS Code (not verified). Proposal: default 20, and a setting on the Card beside Custom headers. |
 
 ### Not verified

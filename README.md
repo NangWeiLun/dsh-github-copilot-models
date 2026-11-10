@@ -44,9 +44,13 @@ npx -- @deepseek-ai/dsh plugin --profile <profile> add dsh-github-copilot-models
 - ⚠️ **PAT and the built-in route:** while a PAT is stored, DSH's built-in GitHub Copilot route does not work. This plugin's own route, `github-copilot-models`, does.
 - 🛡️ **Tokens stay on the server:** the settings page never receives one.
 
+## 📝 Changes
+
+See [CHANGELOG.md](CHANGELOG.md), or the [GitHub Releases](https://github.com/NangWeiLun/dsh-github-copilot-models/releases) page.
+
 ## 🛠️ Development
 
-[DEVELOPMENT.md](DEVELOPMENT.md) covers setup, the test profile, tests and troubleshooting. The design is in [docs/design/](docs/design/overview.md).
+[DEVELOPMENT.md](DEVELOPMENT.md) covers setup, the test profile, tests and troubleshooting. The design is in [docs/design/](docs/design/overview.md). Pull requests follow [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## 📄 License
 

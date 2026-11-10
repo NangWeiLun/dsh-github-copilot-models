@@ -6,11 +6,11 @@ This document has three parts, split by who controls the behaviour:
 
 | Part | Controlled by | Used by the plugin | Content |
 |---|---|---|---|
-| [A. What the plugin owns](#a-what-the-plugin-owns) | the plugin | yes | Our design. We decide it and can change it. |
+| [A. What the plugin owns](#a-what-the-plugin-owns) | the plugin | yes | The plugin's own design. The maintainer decides it and can change it. |
 | [B. What the plugin relies on](#b-what-the-plugin-relies-on) | DSH, pi-ai, GitHub | yes | Behaviour the plugin calls, depends on, or shows to the user. Re-check it when a version changes. |
 | [C. Background only](#c-background-only) | DSH, pi-ai, GitHub | no | Facts found while studying. Nothing in the plugin depends on them. |
 
-Sections are numbered by part (A1, B1, C1). A reference such as "B3" therefore shows straight away that the behaviour is not ours.
+Sections are numbered by part (A1, B1, C1). A reference such as "B3" therefore shows straight away that the plugin does not own the behaviour.
 
 ## Terms
 
@@ -30,7 +30,7 @@ Sections are numbered by part (A1, B1, C1). A reference such as "B3" therefore s
 
 ## A. What the plugin owns
 
-Our design: what the Card and the Host do. It uses the parts listed in B1 but does not change them.
+The plugin's own design: what the Card and the Host do. It uses the parts listed in B1 but does not change them.
 
 ### A1. Configuration
 
@@ -59,7 +59,7 @@ pi-ai builds the sign-in URLs itself, from the answer to its domain prompt (B2).
 
 Only one login is active at a time. Both methods use the same credential record (B3), so a new sign-in replaces the previous one.
 
-**Where the PAT is stored: option A, kept** (decided 2026-10-31, confirmed 2026-11-02 after the live tests).
+**Where the PAT is stored: option A.**
 - **A (chosen):** the PAT goes in the shared record above, through DSH's `api-key` method. One sign-in serves this plugin, DSH's built-in Copilot route and every DSH profile. Cost: while a PAT is stored, the built-in route fails with status 400 (B3), so a user who needs that route signs in by browser instead.
 - **B (rejected):** a record only this plugin reads, for example `<plugin-id>/pat` with `kind: 'api-key'`. It does not make the built-in route work with a PAT; it only lets an older browser login stay beside the PAT. It needs extra rules: which record wins when both exist, and sign-out clearing both.
 - Not a user setting: it would add a second storage path to build and test for a case B does not fix.
@@ -118,7 +118,7 @@ There is no list of allowed host names. The Copilot host is the URL's origin.
 
 These are the only times. The lookup runs once at start-up, never on a timer or in a loop.
 
-**At start-up, a failed lookup keeps the record** (decided 2026-11-01). The Card shows the stored method as "not verified" with the error, and Refresh runs the lookup again. Only sign-out deletes the record.
+**At start-up, a failed lookup keeps the record.** The Card shows the stored method as "not verified" with the error, and Refresh runs the lookup again. Only sign-out deletes the record.
 
 The Copilot host and account name are kept in memory only.
 
@@ -297,7 +297,7 @@ Tests of the plugin's own code. Tests that check DSH and pi-ai are in B7.
 
 ### A10. Card ↔ Host
 
-Decided 2026-11-01. The Card calls the Host through seven exact routes under `/api/github-copilot-models/`, registered with `ctx.connection.fetch.register`, which DSH authenticates. The Models component adds four more beside them (models.md A11). The types are in `src/shared/api.ts`. No route returns a token.
+The Card calls the Host through seven exact routes under `/api/github-copilot-models/`, registered with `ctx.connection.fetch.register`, which DSH authenticates. The Models component adds four more beside them (models.md A11). The types are in `src/shared/api.ts`. No route returns a token.
 
 | Button or view on the Card | Route | Reply |
 |---|---|---|
@@ -312,13 +312,13 @@ Decided 2026-11-01. The Card calls the Host through seven exact routes under `/a
 - The Card sends the Domain field with each sign-in. The Host saves `domain` to `Config` only after a successful lookup.
 - Every `POST` reply above also carries the models state, and `GET state` says whether a `/models` fetch runs. A sign-in and Refresh reply only after the fetch that follows a successful lookup. The Models component's own routes are in models.md A11.
 - Errors are codes with parameters; the Card turns them into the A8 messages in the Card's language ([ui.md](ui.md#u4-text-and-languages) U4).
-- The Card is, for now, the plugin's own Settings section (`settings.section`, id `github-copilot-models`, menu label "Models: Copilot"). Where it should finally live is open, and its layout, text and theme are described in [ui.md](ui.md) (U1–U5). The Host tells `ctx.settings` not to generate a form for the plugin.
+- The Card is the plugin's own Settings section (`settings.section`, id `github-copilot-models`, menu label "Models: Copilot"). Where it should finally live is open, and its layout, text and theme are described in [ui.md](ui.md) (U1–U5). The Host tells `ctx.settings` not to generate a form for the plugin.
 
 ---
 
 ## B. What the plugin relies on
 
-Not ours, but the plugin calls it, depends on it, or shows it to the user. A new DSH or pi-ai version can change any of it. Re-check this part when the versions in [overview.md](overview.md) change.
+Not owned by the plugin, but the plugin calls it, depends on it, or shows it to the user. A new DSH or pi-ai version can change any of it. Re-check this part when the versions in [overview.md](overview.md) change.
 
 ### B1. Dependencies
 
@@ -376,7 +376,7 @@ What runs inside `ctx.authorization.begin()` for the key of the shared record (B
 
 ### B3. The shared credential record
 
-The record of DSH's built-in route `github-copilot`. DSH names it: the plugin asks with `recordKeyFor('github-copilot')` from `@deepseek-ai/dsh-llm-pi-ai` (`RECORD_KEY` in `src/host/ports.ts`), so the two keep sharing one login if DSH ever names its records differently; with DSH 0.2.2-rc.1 the key is `llm-pi-ai/github-copilot`. Decided 2026-11-08: no hard-coded key. The pi-ai flow writes one of two shapes:
+The record of DSH's built-in route `github-copilot`. DSH names it: the plugin asks with `recordKeyFor('github-copilot')` from `@deepseek-ai/dsh-llm-pi-ai` (`RECORD_KEY` in `src/host/ports.ts`), so the two keep sharing one login if DSH ever names its records differently; with DSH 0.2.2-rc.1 the key is `llm-pi-ai/github-copilot`. The plugin does not hard-code the key. The pi-ai flow writes one of two shapes:
 
 | Method | Record content | Written by |
 |---|---|---|
@@ -384,8 +384,8 @@ The record of DSH's built-in route `github-copilot`. DSH names it: the plugin as
 | PAT | `kind: 'api-key'`, `key: <PAT>` | pi-ai flow, method `api-key` |
 
 **Other users of the record:**
-- DSH's built-in `github-copilot` route reads the record, and so does any other plugin that reuses it. They read it each time they need a credential, so a sign-in through this plugin applies to them at once, and sign-out deletes the login they use. A plugin that keeps its own credential store is not affected. Tested 2026-11-02 on the `web-dev` development profile ([DEVELOPMENT.md](../../DEVELOPMENT.md#3-profiles) section 3): after sign-out, a chat with the built-in provider failed with pi-ai's "Provider is not configured: github-copilot" before any request was sent (no record, `COPILOT_GITHUB_TOKEN` unset).
-- While a PAT is stored, DSH's built-in `github-copilot` route does not work: it sends `Copilot-Integration-Id: vscode-chat`, which Copilot rejects for a PAT with status 400; a PAT needs `copilot-developer-cli` (A5). Tested 2026-11-02 on web-dev: the built-in provider, added with no token of its own, picked up the stored PAT and failed with status 400 when a chat started. The route is inactive unless `providers.github-copilot` is set in the DSH settings. The Card warns about this (A2).
+- DSH's built-in `github-copilot` route reads the record, and so does any other plugin that reuses it. They read it each time they need a credential, so a sign-in through this plugin applies to them at once, and sign-out deletes the login they use. A plugin that keeps its own credential store is not affected. Tested on the `web-dev` development profile ([DEVELOPMENT.md](../../DEVELOPMENT.md#3-profiles) section 3): after sign-out, a chat with the built-in provider fails with pi-ai's "Provider is not configured: github-copilot" before any request is sent (no record, `COPILOT_GITHUB_TOKEN` unset).
+- While a PAT is stored, DSH's built-in `github-copilot` route does not work: it sends `Copilot-Integration-Id: vscode-chat`, which Copilot rejects for a PAT with status 400; a PAT needs `copilot-developer-cli` (A5). Tested on web-dev: the built-in provider, added with no token of its own, picks up the stored PAT and fails with status 400 when a chat starts. The route is inactive unless `providers.github-copilot` is set in the DSH settings. The Card warns about this (A2).
 
 **Record writes:**
 - When pi-ai refreshes the Copilot token (B5), it rewrites the record with the new `access` and `expires`. `refresh` (the login token) is unchanged.
@@ -395,7 +395,7 @@ The record of DSH's built-in route `github-copilot`. DSH names it: the plugin as
 
 How `ctx.authorization` runs an attempt:
 - One attempt at a time per key. A second `begin()` while one is running fails with `ALREADY_IN_FLIGHT`. This covers both methods, because both use the same key. `describe(key)` reports `inFlight`.
-- `cancel(key)` makes the running `begin()` resolve `cancelled`. If pi-ai has already started its record write, the write still lands after `begin()` resolved `cancelled`, and `credentials/record-updated` fires ("the orphaned run is left to finish"). So a cancelled sign-in can still replace the record; the Host then treats it as a change made outside the plugin (A2).
+- `cancel(key)` makes the running `begin()` resolve `cancelled`. If pi-ai has already started its record write, the write still lands after `begin()` has resolved `cancelled`, and `credentials/record-updated` fires ("the orphaned run is left to finish"). So a cancelled sign-in can still replace the record; the Host then treats it as a change made outside the plugin (A2).
 - Closing or reloading the Card page cancels the sign-in (DSH default).
 - A Host restart during sign-in ends the attempt.
 - `begin()` throws these error codes: `NO_FLOW` (DSH's `llm-pi-ai` plugin is off), `ALREADY_IN_FLIGHT`, `UNKNOWN_METHOD`, `NOT_COMMITTED`. The plugin's message for each is in A8. `NOT_COMMITTED` cannot occur through the llm-pi-ai flow, which always commits or throws.
@@ -424,7 +424,7 @@ Tests that check this part against the DSH and pi-ai versions in use. They fail 
 
 ## C. Background only
 
-Not ours, and the plugin does not use it. Recorded so it need not be looked up again. If the plugin starts to depend on an item, move the item to part B.
+Not owned by the plugin, and the plugin does not use it. Recorded so it need not be looked up again. If the plugin starts to depend on an item, move the item to part B.
 
 ### C1. pi-ai client identity
 
@@ -454,6 +454,6 @@ Not ours, and the plugin does not use it. Recorded so it need not be looked up a
 
 Found during the study and the tests.
 
-- **Copilot token lifetime is unknown.** After one re-login, the stored expiry was about 24 hours ahead; a code comment in `dsh-plugin-subscriptions` says about 30 minutes. The exchange reply was never seen. pi-ai refreshes the token itself (B5).
+- **Copilot token lifetime is unknown.** A stored expiry about 24 hours ahead has been seen after one re-login; a code comment in `dsh-plugin-subscriptions` says about 30 minutes. The exchange reply has never been seen. pi-ai refreshes the token itself (B5).
 - **Account picker.** If several GitHub accounts are signed in, github.com shows an account picker on the device page. The plugin never types the code.
-- **Custom domains were never seen working** on a real `.ghe.com` tenant. One search snippet (not opened) says the token exchange returns 404 there. pi-ai stores the domain in the credential at sign-in, so changing it needs a new sign-in.
+- **Custom domains are unverified** on a real `.ghe.com` tenant. One search snippet (not opened) says the token exchange returns 404 there. pi-ai stores the domain in the credential at sign-in, so changing it needs a new sign-in.

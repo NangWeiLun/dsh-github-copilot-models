@@ -2,7 +2,7 @@
 
 How to set up, build, test and run this plugin on a DSH profile. The rules for working here are in [AGENTS.md](AGENTS.md), the design in [docs/design/](docs/design/overview.md), and packaging and the differences from the official guide in [docs/packaging.md](docs/packaging.md).
 
-Checked against DeepSeek Harness (DSH) `0.2.2-rc.1`, pi-ai `1.4.0` (DSH's own install carries `1.5.0`), Node `24.22`, pnpm `12.14`, on Linux, on 2026-11-06.
+Verified with DeepSeek Harness (DSH) `0.2.2-rc.1`, pi-ai `1.4.0` (DSH's own install carries `1.5.0`), Node `24.22` and pnpm `12.14`, on Linux.
 
 ## 1. How the pieces fit
 
@@ -175,7 +175,7 @@ src/shared/api.ts    Card ↔ Host contract
 scripts/             build.mjs (esbuild, with an import check), dev-host.mjs
 test/unit/           over fakes
 test/contract/       installed DSH and pi-ai, offline
-docs/                design/, packaging.md, todo.md, study/
+docs/                design/, packaging.md, cicd.md, todo.md, study/
 lib/, .tmp/          build output; web-dev log and start folder (git-ignored)
 ```
 

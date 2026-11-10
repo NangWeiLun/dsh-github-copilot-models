@@ -1,6 +1,6 @@
 # Quota
 
-Status: not in version 1. Nothing is designed yet. This file keeps what was found.
+Status: not in version 1. Nothing is designed yet. This file keeps the findings.
 
 Not re-checked against the versions in [overview.md](overview.md).
 
@@ -24,7 +24,7 @@ Evidence labels: **[tested]** a real call in this project. **[code]** read in so
 
 Derived from one saved reply (not published; it holds account data). Only field names and types are recorded here.
 
-**Request that produced it [tested, 2026-10-30, one call, a PAT]:** `GET https://api.github.com/copilot_internal/user` with only two headers, `Accept: application/json` and `Authorization: token <PAT>`. No `X-GitHub-Api-Version` and no editor headers. Result: `200 OK`, `application/json; charset=utf-8`.
+**Request that produced it [tested, one call, a PAT]:** `GET https://api.github.com/copilot_internal/user` with only two headers, `Accept: application/json` and `Authorization: token <PAT>`. No `X-GitHub-Api-Version` and no editor headers. Result: `200 OK`, `application/json; charset=utf-8`.
 
 **Top level, 13 fields that are not booleans**
 
@@ -51,7 +51,7 @@ Derived from one saved reply (not published; it holds account data). Only field 
 | Field | Use |
 |---|---|
 | `api` | The Copilot host for the account. Read by Login ([login.md](login.md) A3) |
-| `proxy` | The host that the Copilot token's `proxy-ep` names. Replacing `proxy.` with `api.` gave the same value as `api` in the saved reply (offline check) |
+| `proxy` | The host that the Copilot token's `proxy-ep` names. Replacing `proxy.` with `api.` gives the same value as `api` in the saved reply (offline check) |
 | `origin-tracker`, `telemetry`, `exp` | Not used |
 
 **`quota_snapshots`: 3 objects, `chat`, `completions` and `premium_interactions`.** All three have the same 14 fields with the same types (checked by script).
@@ -68,6 +68,6 @@ Derived from one saved reply (not published; it holds account data). Only field 
 
 ## Not verified
 
-- Other plans. The parser of `dsh-github-copilot` also names `monthly_quotas`, `limited_user_quotas` and `limited_user_reset_date`, which the saved reply did not have [code]. They probably belong to other plans [assumption].
-- The reply's fields with a browser-login token. Login sends this call with that token at every browser sign-in, but reads only `endpoints.api` and `login` ([login.md](login.md) A3); `dsh-github-copilot` reads the quota fields that way [code]. Also not tried: `Authorization: Bearer` (only the `token` scheme was used).
-- Whether the reply changes with the headers the client sends. A third-party report says `endpoints.api` did, for one Enterprise account across Copilot CLI versions [reported, copilot-cli issue 5165].
+- Other plans. The parser of `dsh-github-copilot` also names `monthly_quotas`, `limited_user_quotas` and `limited_user_reset_date`, which the saved reply does not have [code]. They probably belong to other plans [assumption].
+- The reply's fields with a browser-login token. Login sends this call with that token at every browser sign-in, but reads only `endpoints.api` and `login` ([login.md](login.md) A3); `dsh-github-copilot` reads the quota fields that way [code]. Also not tried: `Authorization: Bearer` (the tested call uses only the `token` scheme).
+- Whether the reply changes with the headers the client sends. A third-party report says `endpoints.api` does, for one Enterprise account across Copilot CLI versions [reported, copilot-cli issue 5165].

@@ -1,6 +1,8 @@
 # Reference plugins
 
-Six of the DSH plugins for GitHub Copilot found by [scan-similar-plugins.md](scan-similar-plugins.md) were read for this project, plus `dsh-commandcode-provider`, a DSH provider plugin for Command Code (not GitHub Copilot), read for its settings pattern and search structure. The six were read on 2026-10-28 and `dsh-commandcode-provider` later, all on DSH 0.2.1-rc.2 and pi-ai 1.3.0 between 2026-10-28 and 2026-10-30, at the commits listed in section 1. They have not been re-checked since. Items marked [code] were read in the source at the commit listed; they were not independently re-checked.
+Snapshot of the reference plugins at the commits listed in section 1, taken between 2026-10-28 and 2026-10-30 against DSH 0.2.1-rc.2 and pi-ai 1.3.0.
+
+Six of the DSH plugins for GitHub Copilot found by [scan-similar-plugins.md](scan-similar-plugins.md) were read for this project, plus `dsh-commandcode-provider`, a DSH provider plugin for Command Code (not GitHub Copilot), read for its settings pattern and search structure. Items marked [code] were read in the source at the commit listed; they were not independently re-checked.
 
 Evidence labels: **[code]** read in source, not run. **[doc]** a README, ADR, changelog or comment says so. **[reported]** a third party says so.
 
@@ -145,7 +147,7 @@ This plugin sets no client identity headers of its own except `Copilot-Integrati
 
 | Pattern | From | Why |
 |---|---|---|
-| Insert only your own row in the bundle patch, with a `name` guard on any row you patch | dsh-copilot-auth | No duplicate-service error, no silent patching of the wrong row |
+| Insert only the plugin's own row in the bundle patch, with a `name` guard on any row it patches | dsh-copilot-auth | No duplicate-service error, no silent patching of the wrong row |
 | Find pi-ai's sign-in flow with `authorization.list()`, drive it with `begin` and a host-side `interaction` | dsh-plugin-copilot, dsh-copilot-auth, dsh-github-copilot | No second flow, so no `DUPLICATE_FLOW` (used in [login.md](../design/login.md)) |
 | Event ring with sequence numbers and cursor polling for the device code | dsh-plugin-copilot | Reload-safe notices (used in login.md A4) |
 | Generation counter for timers, Host-side polling that outlives the dialog | dsh-llm-github-copilot | No stale timers, no lost sign-in |
@@ -180,11 +182,11 @@ Each was seen in at least one of the reference repos. The pitfall numbers point 
 
 ## 7. Pitfalls
 
-Learned from the reference repos. Read on DSH 0.2.1-rc.2. Other documents cite these numbers, so they are kept stable; P16 is not used.
+Learned from the reference repos. Other documents cite these numbers, so they are kept stable; P16 is not used.
 
 | # | What happened | Source | Lesson |
 |---|---|---|---|
-| P1 | Sign-in works, but no models appear until a provider entry for the built-in route is added by hand. The built-in `github-copilot` route stays dormant until that entry exists | dsh-llm-github-copilot README, ADR 0002 [doc] | Our own route avoids it |
+| P1 | Sign-in works, but no models appear until a provider entry for the built-in route is added by hand. The built-in `github-copilot` route stays dormant until that entry exists | dsh-llm-github-copilot README, ADR 0002 [doc] | This plugin's own route avoids it |
 | P2 | A Host route registered with `ctx.webServer.register()` was unauthenticated and not reachable from the browser's `/api`. Sign-in requests returned 404 for a release | dsh-llm-github-copilot CHANGELOG 0.4.8 [doc] | Use `ctx.connection.fetch.register()` |
 | P3 | An empty model list was cached for 5 min after logout, so the picker stayed empty after re-login. Fix: a 5 s TTL for empty or failed results, and clear caches on sign-in | dsh-llm-github-copilot CHANGELOG 0.4.1 [doc] | Clear lists on sign-in and sign-out (models.md A3) |
 | P4 | A listener for the credentials-changed event used an old event name and did not fire | dsh-llm-github-copilot CHANGELOG [doc] | Use the event name from the package, and test it |
@@ -210,7 +212,7 @@ Learned from the reference repos. Read on DSH 0.2.1-rc.2. Other documents cite t
 | P25 | A read-only env credential reference rejects `credentials.set`. Sign-out then reports success while a token remains | dsh-llm-github-copilot 0.4.10, 0.4.11 [doc] | Check `describe(ref).writable`, report a remaining token (login.md A6) |
 | P26 | Cordis returns a different traced object on each service read | dsh-github-copilot alpha.14 [doc] | Use `symbols.original` to identify the credentials service |
 | P27 | A Responses-wire 401 can be a replay-scope error, not an auth failure. Only the body tells them apart. dsh-plugin-subscriptions retries any 401 once with a refresh | dsh-github-copilot; dsh-plugin-subscriptions [code] | Read the body before treating a 401 as a sign-in problem |
-| P28 | dsh-plugin-subscriptions' device polling stops on a transient network error | dsh-plugin-subscriptions [code] | pi-ai runs our polling (login.md B2) |
+| P28 | dsh-plugin-subscriptions' device polling stops on a transient network error | dsh-plugin-subscriptions [code] | pi-ai runs this plugin's polling (login.md B2) |
 | P29 | Gemini on Copilot: tool schemas without `properties` give a 400. Usage arrives as zero on every chunk, with thinking in `reasoning_text` | dsh-copilot-tool-schema; dsh-plugin-subscriptions [code], measured on one account each | [overview.md](../design/overview.md#scope), Scope |
 | P30 | DSH does not authenticate routes registered with `webServer.register`, so a plugin has to guard them itself: dsh-plugin-copilot and dsh-copilot-auth both check the request's Origin. `connection.fetch.register` routes are authenticated: an unauthenticated GET gets 401 in dsh-llm-github-copilot's packed-install test | dsh-llm-github-copilot CHANGELOG 0.4.8 [doc]; dsh-plugin-copilot `src/gateway.ts`, dsh-copilot-auth `src/host.mjs` [code] | Same as P2 |
 | P31 | dsh-plugin-copilot's `package.json` exports `./src/*`, although `src` is not in `files` | dsh-plugin-copilot [code] | Test the `exports` and `files` surface |

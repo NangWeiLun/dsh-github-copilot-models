@@ -2,7 +2,7 @@
 
 Status: not started. Planned. Whether it ships in version 1 or later is open.
 
-Items marked [code] were read in the reference repositories, at the commits linked below, between 2026-10-28 and 2026-10-30. They were not re-checked against the versions in [overview.md](overview.md). Nothing here was run.
+Items marked [code] hold for the reference repositories at the commits linked below. They are not re-checked against the versions in [overview.md](overview.md). Nothing here has been run.
 
 Evidence labels: **[decided]** a decision for this project. **[code]** read in source, not run. **[doc]** a README, ADR or comment says so. **[assumption]** an inference.
 
@@ -44,7 +44,7 @@ Serve DSH web search through Copilot, with `dsh-commandcode-provider` as the ref
 
 ## Plan from the old design (not confirmed)
 
-- Follow the selection and settings pattern of `dsh-commandcode-provider`. Build the Copilot call ourselves.
+- Follow the selection and settings pattern of `dsh-commandcode-provider`. Build the Copilot call in this plugin.
 - The call: `POST /responses` with the `web_search` tool, SSE routed by `output_index`, citations from structured fields only, 400, 404 and 422 mapped to "unsupported".
 - The search model is configurable, never hardcoded. Config candidates: the search model, and `searchMode`.
 - Never change the shared `web` row.

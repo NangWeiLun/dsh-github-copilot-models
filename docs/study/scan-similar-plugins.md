@@ -1,6 +1,6 @@
 # DSH plugins that use the GitHub Copilot provider
 
-Surveyed on **2026-10-28** against DeepSeek Harness (DSH) `0.2.1-rc.2`.
+Snapshot of a survey taken on **2026-10-28** against DeepSeek Harness (DSH) `0.2.1-rc.2`, with the route ids re-checked in code on **2026-11-01**.
 
 Six of these were read in depth, together with `dsh-commandcode-provider`, which is not a Copilot plugin: [ref-similar-plugins.md](ref-similar-plugins.md).
 
@@ -10,7 +10,7 @@ This covers DSH plugins that use GitHub Copilot as an LLM provider, sign in to i
 - **Last update** is the date of the most recent release, including pre-releases: an npm publish or a GitHub release, whichever is newer. Projects with no release show the date of their last commit, marked `(commit)`.
 - **Supported DSH** is the DSH version the release notes or README say the plugin supports or was tested on. It is blank when neither says. A version range copied from `package.json` is not shown unless the README repeats it.
 - **⭐** is the project's GitHub star count on the survey date.
-- **Route** is the model provider ID (route id) the plugin registers or activates. **Re-checked on 2026-11-01 in each plugin's code** (the npm `latest` tarball, or the GitHub default branch for GitHub-only projects); the other columns are still from 2026-10-28. See [Route IDs](#route-ids-checked-in-code-2026-11-01).
+- **Route** is the model provider ID (route id) the plugin registers or activates, as re-checked in each plugin's code (the npm `latest` tarball, or the GitHub default branch for GitHub-only projects). See [Route IDs](#route-ids-checked-in-code).
 
 ## Quick list
 
@@ -20,16 +20,16 @@ This covers DSH plugins that use GitHub Copilot as an LLM provider, sign in to i
 
 ---
 
-## Route IDs (checked in code, 2026-11-01)
+## Route IDs (checked in code)
 
 The route id is the `provider` name a model request carries. DSH gives each id exactly one adapter; a second `registerAdapter` for a taken id fails with `DUPLICATE_ADAPTER`. DSH's own `llm-pi-ai` registers `github-copilot` only while the profile's settings contain `llm-pi-ai.providers.github-copilot`.
 
-Read in the npm `latest` tarballs (25 packages) and the GitHub default branches (18 repos) on 2026-11-01: the `registerAdapter` calls, the constants they use, and the settings the plugin writes. Nothing was installed or run. Plugins that serve no Copilot model (quota, delegation, search only) are left out.
+Read in the npm `latest` tarballs (25 packages) and the GitHub default branches (18 repos): the `registerAdapter` calls, the constants they use, and the settings the plugin writes. Nothing was installed or run. Plugins that serve no Copilot model (quota, delegation, search only) are left out.
 
 | Route id | How the plugin uses it | Plugins |
 |---|---|---|
 | `github-copilot` | **Configures DSH's built-in route.** No adapter of its own; signs in, writes the settings entry, or edits the model list | @lujianjun19/dsh-llm-github-copilot, iasiv5/dsh-copilot-auth, @huanlin/dsh-plugin-copilot, dsh-copilot-catalog (runs DSH's `llm-pi-ai` from a replacement row), dsh-vendor-login, dsh-subscription-login, dsh-github-copilot-accounts, dsh-keys-manager, amosogra/dsh-subscription-signin, 805996329/dsh-github-copilot-signin, Jacky521L/dsh-github-auth |
-| `github-copilot` | **Registers its own adapter on the built-in's id.** Works only while DSH's `llm-pi-ai` doesn't hold it | dsh-oauth-copilot (own `PiAiAdapter`; skips registering if the id is taken), @edge-sky/dsh-oauth-adapter (own `PiAiAdapter`; first removes `llm-pi-ai.providers.github-copilot` from settings and waits for `llm-pi-ai` to release the id), ziyou979/dsh-llm-oauth (own adapter; fails with an error if the id is taken), Stormycry-cryp/dsh-AuthInOne (own transport), pi2dsh (id taken from pi's provider list; read, not run), @dsh-one/dsh-llm-provider (turns off the official `llm-pi-ai` row and runs its code on a newer pi-ai) |
+| `github-copilot` | **Registers its own adapter on the built-in's id.** Works only while DSH's `llm-pi-ai` does not hold it | dsh-oauth-copilot (own `PiAiAdapter`; skips registering if the id is taken), @edge-sky/dsh-oauth-adapter (own `PiAiAdapter`; first removes `llm-pi-ai.providers.github-copilot` from settings and waits for `llm-pi-ai` to release the id), ziyou979/dsh-llm-oauth (own adapter; fails with an error if the id is taken), Stormycry-cryp/dsh-AuthInOne (own transport), pi2dsh (id taken from pi's provider list; read, not run), @dsh-one/dsh-llm-provider (turns off the official `llm-pi-ai` row and runs its code on a newer pi-ai) |
 | `copilot` | Own adapter | dsh-plugin-subscriptions, @goodandready/dsh-subscriptions, dsh-llm-bridge, dsh-subscriptions, zdz6215591/dsh-subscription-hub, why-au/dsh-unified, @bobhuhu/dsh-llm-github-copilot-cli, youngrock-labs/dsh-provider-copilot (default; configurable), GongYuanCaiJi/dsh-copilot-sdk, nathan5580/dsh-copilot. arzvaak/dsh-provider-hub uses dsh-plugin-subscriptions' route |
 | `copilot-oauth` | Own adapter | dsh-auth-everying, kam74515-boop/dsh-everything-oauth, ericleoo/dsh-llm-copilot |
 | `github-copilot-preview` | Own adapter, a subclass of `PiAiAdapter` | dsh-github-copilot |
@@ -43,7 +43,7 @@ Read in the npm `latest` tarballs (25 packages) and the GitHub default branches 
 | `github-copilot-official` | Named in the profile's comment for an older version of dsh-llm-github-copilot. Its current version registers no route | Ai110002/dsh-multi-provider-profile |
 
 - **No Copilot route found:** @askdkc/dsh-auth 0.1.2. Its provider list (`openai-codex`, `anthropic`, `xai`, `opencode`, `opencode-go`, `openrouter`, `orcarouter`, `nous`, `infron`) has no Copilot.
-- **Most common ids:** `github-copilot` (17 plugins) and `copilot` (10). Two plugins with the same id can't run in one profile.
+- **Most common ids:** `github-copilot` (17 plugins) and `copilot` (10). Two plugins with the same id cannot run in one profile.
 - **Not used by any plugin above:** `copilot-live`, `github-copilot-live`, `copilot-account`, `github-copilot-account`, `copilot-models`, `github-copilot-models`, `copilot-direct`, `copilot-native`, `github-copilot-native`.
 
 ---
@@ -54,7 +54,7 @@ Read in the npm `latest` tarballs (25 packages) and the GitHub default branches 
 |---|---|---|
 | `@deepseek-ai/dsh-llm-pi-ai` (ships with DSH) | `github-copilot` | Built-in pi-ai catalog route. Reads the credential from `COPILOT_GITHUB_TOKEN`; default base URL is `https://api.individual.githubcopilot.com`. The add-ons in [section 4](#4-add-ons-for-the-built-in-github-copilot-route) add sign-in UI, account handling, and catalog fixes on top of it. |
 
-There's no official standalone Copilot package: `@deepseek-ai/dsh-llm-github-copilot` and `@deepseek-ai/dsh-llm-copilot` both return 404 on npm.
+There is no official standalone Copilot package: `@deepseek-ai/dsh-llm-github-copilot` and `@deepseek-ai/dsh-llm-copilot` both return 404 on npm.
 
 ## 2. Multi-provider subscription plugins (Copilot plus others)
 
@@ -72,8 +72,8 @@ There's no official standalone Copilot package: `@deepseek-ai/dsh-llm-github-cop
 | [dsh-auth-everying](https://www.npmjs.com/package/dsh-auth-everying) · [repo](https://github.com/chenbin-dev/dsh-auth-everying) | 0.1.4 | 2026-08-21 |  | 4 | Imports existing local Claude, Codex, Grok, Gemini, Copilot, and OpenCode logins; OAuth for the official providers | `copilot-oauth` |
 | [@askdkc/dsh-auth](https://www.npmjs.com/package/@askdkc/dsh-auth) · [repo](https://github.com/askdkc/dsh-auth-fork) | 0.1.2 | 2026-09-28 |  | 0 | Provider auth and model routes for the pi-ai OAuth providers, including Copilot; bundled with dsh-tui | none in 0.1.2 (no Copilot in its provider list) |
 | [@edge-sky/dsh-oauth-adapter](https://www.npmjs.com/package/@edge-sky/dsh-oauth-adapter) · [repo](https://github.com/edge-sky/dsh-oauth-adapter) | 0.1.3-rc.5 | 2026-10-19 | ≥ 0.2.0-rc.2 (older DSH needs older adapter releases) | 7 | Web and Desktop account page for DSH's official authorization flows; Copilot through a GitHub or GitHub Enterprise device code | `github-copilot` (own adapter; removes the built-in's settings entry first) |
-| [dsh-hub-oauth-gateway](https://www.npmjs.com/package/dsh-hub-oauth-gateway) · [repo](https://github.com/lninghaha/dsh-hub-oauth-gateway) | 1.13.6 | 2026-10-23 | verified on 0.1.1-rc.2; install range covers 0.1.x and 0.2.x | 1 | Usage center plus subscription OAuth. The Copilot route stays off until you set `oauthDevice.copilotClientId`. | `github-copilot-oauth` |
-| [@dsh-one/dsh-llm-provider](https://www.npmjs.com/package/@dsh-one/dsh-llm-provider) · [repo](https://github.com/imchangchang/dsh-llm-provider) | 0.2.2 | 2026-10-02 (pre-release 0.3.0-alpha.3) | ≥ 0.1.6-alpha.1, including the 0.2 line | 1 | Replaces the built-in llm-pi-ai and llm-deepseek adapters and the model picker; shows only the Copilot models your account can use, plus Copilot quota | `github-copilot` |
+| [dsh-hub-oauth-gateway](https://www.npmjs.com/package/dsh-hub-oauth-gateway) · [repo](https://github.com/lninghaha/dsh-hub-oauth-gateway) | 1.13.6 | 2026-10-23 | verified on 0.1.1-rc.2; install range covers 0.1.x and 0.2.x | 1 | Usage center plus subscription OAuth. The Copilot route stays off until `oauthDevice.copilotClientId` is set. | `github-copilot-oauth` |
+| [@dsh-one/dsh-llm-provider](https://www.npmjs.com/package/@dsh-one/dsh-llm-provider) · [repo](https://github.com/imchangchang/dsh-llm-provider) | 0.2.2 | 2026-10-02 (pre-release 0.3.0-alpha.3) | ≥ 0.1.6-alpha.1, including the 0.2 line | 1 | Replaces the built-in llm-pi-ai and llm-deepseek adapters and the model picker; shows only the Copilot models the user's account can use, plus Copilot quota | `github-copilot` |
 | [pi2dsh](https://www.npmjs.com/package/pi2dsh) · [repo](https://github.com/weijiafu14/pi2dsh) | 0.27.1 | 2026-10-26 | 0.2.1-rc.2, 0.2.1-rc.3 | 213 | Runs Pi extensions in DSH. Its `subscription-login` example adds ChatGPT, Claude, Copilot, and Kimi through `/login`. | `github-copilot` (pi's provider id) |
 
 ### GitHub only (not on npm)
@@ -98,7 +98,7 @@ There's no official standalone Copilot package: `@deepseek-ai/dsh-llm-github-cop
 | Plugin | Version | Last update | Supported DSH | ⭐ | How it works | Route |
 |---|---|---|---|---|---|---|
 | [dsh-oauth-copilot](https://www.npmjs.com/package/dsh-oauth-copilot) · [repo](https://github.com/FMDD61/dsh-oauth-copilot) | 0.3.2 | 2026-10-18 | verified on 0.2.1-rc.2; peer range covers 0.1.5-rc.1 up to (not including) 0.3.0 | 1 | GitHub OAuth sign-in plus a Copilot model route backed by pi-ai's Copilot catalog; includes a `dsh-copilot-auth` CLI | `github-copilot` (own `PiAiAdapter`; skips registering when the id is taken) |
-| [@bobhuhu/dsh-llm-github-copilot-cli](https://www.npmjs.com/package/@bobhuhu/dsh-llm-github-copilot-cli) · [repo](https://github.com/BobHuHu/dsh-llm-github-copilot-cli) | 0.1.6 | 2026-09-02 | 0.1.1-rc.2 | 0 | Built on the official `@github/copilot-sdk` and the Copilot CLI; doesn't call Copilot endpoints directly | `copilot` |
+| [@bobhuhu/dsh-llm-github-copilot-cli](https://www.npmjs.com/package/@bobhuhu/dsh-llm-github-copilot-cli) · [repo](https://github.com/BobHuHu/dsh-llm-github-copilot-cli) | 0.1.6 | 2026-09-02 | 0.1.1-rc.2 | 0 | Built on the official `@github/copilot-sdk` and the Copilot CLI; does not call Copilot endpoints directly | `copilot` |
 | [dsh-copilot-api](https://www.npmjs.com/package/dsh-copilot-api) · [repo](https://github.com/caozhiyuan/dsh-copilot-api) | 0.1.8 | 2026-10-21 | 0.2.1-rc.2 (tested) | 1 | Provider for a running [copilot-api](https://github.com/caozhiyuan/copilot-api) gateway (same author) | `copilot-api` |
 
 ### GitHub only (not on npm)
@@ -106,15 +106,15 @@ There's no official standalone Copilot package: `@deepseek-ai/dsh-llm-github-cop
 | Repo | Version | Last update | Supported DSH | ⭐ | How it works | Route |
 |---|---|---|---|---|---|---|
 | [youngrock-labs/dsh-provider-copilot](https://github.com/youngrock-labs/dsh-provider-copilot) | 0.0.1 | 2026-09-03 (commit) |  | 4 | Uses a Copilot subscription as an ordinary LLM provider; adds `/copilot login`, `logout`, and `status` | `copilot` |
-| [GongYuanCaiJi/dsh-copilot-sdk](https://github.com/GongYuanCaiJi/dsh-copilot-sdk) | 1.0.11 | 2026-08-15 (commit) |  | 5 | Port of `@github/copilot-sdk`; your subscription's models show up in the model picker; adds `/copilot status`, `models`, and `stop` | `copilot` |
+| [GongYuanCaiJi/dsh-copilot-sdk](https://github.com/GongYuanCaiJi/dsh-copilot-sdk) | 1.0.11 | 2026-08-15 (commit) |  | 5 | Port of `@github/copilot-sdk`; the models of the user's subscription show up in the model picker; adds `/copilot status`, `models`, and `stop` | `copilot` |
 | [nathan5580/dsh-copilot](https://github.com/nathan5580/dsh-copilot) | 0.1.0 | 2026-08-17 (commit) | ≥ 0.1.0-rc.6 | 0 | OpenAI-compatible adapter and profile bundle; needs a local Copilot proxy such as copilot2api. The npm package named `dsh-copilot` is an unrelated placeholder. | `copilot` |
-| [ericleoo/dsh-llm-copilot](https://github.com/ericleoo/dsh-llm-copilot) | 0.1.0-rc.6 | 2026-09-11 (commit) |  | 0 | Chat-completions adapter with OAuth device-flow sign-in. Its `package.json` uses the `@deepseek-ai/` scope, but it isn't official or published. | `copilot-oauth` |
+| [ericleoo/dsh-llm-copilot](https://github.com/ericleoo/dsh-llm-copilot) | 0.1.0-rc.6 | 2026-09-11 (commit) |  | 0 | Chat-completions adapter with OAuth device-flow sign-in. Its `package.json` uses the `@deepseek-ai/` scope, but it is not official or published. | `copilot-oauth` |
 | [83uc0/dsh-copilot-auth](https://github.com/83uc0/dsh-copilot-auth) | 0.1.0 | 2026-09-08 (commit) | 0.1.1-rc.2 | 0 | Package `@vincent-raffin/dsh-llm-github-copilot`; Copilot through the official SDK and CLI | `github-copilot-sdk` |
 | [donalaaaaaaa/dsh-llm-copilot-acp](https://github.com/donalaaaaaaa/dsh-llm-copilot-acp) | 0.1.7-rc.2 | 2026-09-28 (commit) |  | 0 | Talks to the local Copilot CLI over ACP (`copilot --acp`); targets DSH Desktop | `github-copilot-acp` |
 
 ## 4. Add-ons for the built-in `github-copilot` route
 
-These don't include an adapter of their own. They add sign-in UI, accounts, model discovery, search, or tool-schema fixes to the built-in route in `@deepseek-ai/dsh-llm-pi-ai`.
+These do not include an adapter of their own. They add sign-in UI, accounts, model discovery, search, or tool-schema fixes to the built-in route in `@deepseek-ai/dsh-llm-pi-ai`.
 
 ### On npm
 
@@ -125,7 +125,7 @@ These don't include an adapter of their own. They add sign-in UI, accounts, mode
 | [iasiv5/dsh-copilot-auth](https://github.com/iasiv5/dsh-copilot-auth) | 1.2.23 | 2026-10-26 | 0.1.7-rc.2, 0.2.0-rc.1, 0.2.0-rc.2, 0.2.1-rc.2, 0.2.1-rc.3 (tested) | 1 | Settings page for device-code login and logout, a preconfigured route, and model-list management |
 | [@huanlin/dsh-plugin-copilot](https://www.npmjs.com/package/@huanlin/dsh-plugin-copilot) · [repo](https://github.com/HuanLinOTO/dsh-plugin-copilot) | 0.3.1 | 2026-09-30 | ≥ 0.1.2-alpha.1 (needs the built-in `dsh-llm-pi-ai` Copilot route) | 1 | One-click GitHub authorization card; turns on the route and trims the model list |
 | [dsh-github-copilot-accounts](https://www.npmjs.com/package/dsh-github-copilot-accounts) · [repo](https://github.com/JacobCodeShow/dsh-github-copilot-accounts) | 0.1.2-dsh-0.2.0-rc.1 | 2026-09-30 | 0.2.0-rc.1 (desktop); 0.1.7-rc.2 also works | 0 | Multiple accounts (github.com and GitHub Enterprise), one-click switching, quota and token usage |
-| [dsh-copilot-catalog](https://www.npmjs.com/package/dsh-copilot-catalog) · [repo](https://github.com/1yefuwang1/dsh-copilot-catalog) | 0.2.8 | 2026-10-24 | 0.2.1-rc.3 (exact) | 0 | Discovers the Copilot models your account can use and sends Copilot-compatible request headers (wraps the pi-ai adapter) |
+| [dsh-copilot-catalog](https://www.npmjs.com/package/dsh-copilot-catalog) · [repo](https://github.com/1yefuwang1/dsh-copilot-catalog) | 0.2.8 | 2026-10-24 | 0.2.1-rc.3 (exact) | 0 | Discovers the Copilot models the user's account can use and sends Copilot-compatible request headers (wraps the pi-ai adapter) |
 | [dsh-copilot-search](https://www.npmjs.com/package/dsh-copilot-search) · same repo | 0.1.4 | 2026-10-24 | 0.2.1-rc.3 (exact) | 0 | Copilot's own web search, exposed as a DSH search provider (`github-copilot-search`) |
 | [dsh-copilot-tool-schema](https://www.npmjs.com/package/dsh-copilot-tool-schema) · same repo | 0.1.2 | 2026-10-24 | 0.2.1-rc.3 (exact) | 0 | Fixes tool definitions for Copilot's Gemini models by adding the missing root `properties` field |
 
@@ -140,7 +140,7 @@ These don't include an adapter of their own. They add sign-in UI, accounts, mode
 
 | Plugin | Source | Last update | Supported DSH | ⭐ | Notes |
 |---|---|---|---|---|---|
-| [@softspark/dsh-orchestrator](https://www.npmjs.com/package/@softspark/dsh-orchestrator) | npm 2.0.0 | 2026-09-06 | 2.0.0 targets 0.1.2-rc.1 (the older 1.1.0 targets 0.1.1-rc.2) | 3 | Hands single tasks to Claude Code or to Copilot's Gemini models through your existing logins. **The GitHub repo is archived.** |
+| [@softspark/dsh-orchestrator](https://www.npmjs.com/package/@softspark/dsh-orchestrator) | npm 2.0.0 | 2026-09-06 | 2.0.0 targets 0.1.2-rc.1 (the older 1.1.0 targets 0.1.1-rc.2) | 3 | Hands single tasks to Claude Code or to Copilot's Gemini models through the user's existing logins. **The GitHub repo is archived.** |
 | [m17316536232-cmd/dsh_copilot_acp](https://github.com/m17316536232-cmd/dsh_copilot_acp) | GitHub, 0.1.1 | 2026-09-11 (commit) | 0.1.2-rc.1 (peers pinned to that release) | 0 | Package `dsh-copilot-acp`. Runs the official Copilot CLI as an ACP subagent that the DSH agent can delegate work to |
 
 ## 6. Quota, usage, and other plugins that use Copilot
@@ -178,11 +178,11 @@ These don't include an adapter of their own. They add sign-in UI, accounts, mode
 
 ## Notes
 
-- **Use one plugin per route.** Several plugins register or activate the same route id (`github-copilot`, `copilot`). DSH lets one adapter own each id (`DUPLICATE_ADAPTER`), and the Models page directory refuses a second declaration of the same provider (`DUPLICATE_DIRECTORY`; the dsh-plugin-copilot README reports a profile failing to start with it). See [Route IDs](#route-ids-checked-in-code-2026-11-01).
-- **Your GitHub account needs Copilot access.** The dsh-subscription-login README shows sign-in failing with `no_copilot_access` on an account without it.
+- **Use one plugin per route.** Several plugins register or activate the same route id (`github-copilot`, `copilot`). DSH lets one adapter own each id (`DUPLICATE_ADAPTER`), and the Models page directory refuses a second declaration of the same provider (`DUPLICATE_DIRECTORY`; the dsh-plugin-copilot README reports a profile failing to start with it). See [Route IDs](#route-ids-checked-in-code).
+- **The user's GitHub account needs Copilot access.** The dsh-subscription-login README shows sign-in failing with `no_copilot_access` on an account without it.
 - **All of these are community plugins.** The only official Copilot code is the built-in route in `@deepseek-ai/dsh-llm-pi-ai`.
 - **GitHub-only plugins can be installed from GitHub.** For example, the dsh-llm-github-copilot README installs it with `dsh plugin --profile <profile> add github:lujianjun19/dsh-llm-github-copilot -w`.
-- Versions and star counts change quickly. Check them again before you install anything.
+- Versions and star counts change quickly. Check them again before installing anything.
 
 ## How this list was built
 
@@ -191,5 +191,5 @@ These don't include an adapter of their own. They add sign-in UI, accounts, mode
 - Searched GitHub repositories (`topic:dsh-plugin`, `topic:deepseek-harness`, and matches in names, descriptions, and READMEs). For each GitHub-only project, checked its `package.json` name against npm.
 - Compared against community lists: bruc3van/awesome-dsh-plugin, beancookie/awesome-dsh-plugin, Zhiyuan-Fan/Awesome-DeepSeek-Harness-Plugins, 0xsline, Dominic789654, and fendouai awesome-deepseek-harness, leenkcool/Blue-Whale-Harness, imsai-sh, and dshworks.
 - For **Last update** and **Supported DSH**, read each plugin's npm publish dates, GitHub releases feed (release notes), commit feed, README, and CHANGELOG. Supported DSH is only filled in where a release note, README, or changelog gives a version; it is blank otherwise.
-- Limits: npm search doesn't find everything (`dsh-vendor-login` only turned up through GitHub), and GitHub's API rate limit cut some searches short, so a few plugins may be missing.
-- **Route ids, 2026-11-01:** downloaded the npm `latest` tarball of the 25 npm plugins in sections 2 to 4, shallow-cloned the 18 GitHub-only repos in sections 2 to 4, and read each one's `registerAdapter` calls and settings writes. Repeated six npm searches (`copilot keywords:cordis-plugin`, `dsh-copilot`, `dsh github copilot`, `copilot dsh-llm`, `copilot harness plugin`, `github copilot deepseek`) and one web search: no new Copilot model plugin turned up. Newer npm versions seen on that date: dsh-plugin-subscriptions 0.9.12, @goodandready/dsh-subscriptions 0.7.64, dsh-subscriptions 0.2.3, dsh-copilot-api 0.1.9, dsh-copilot-catalog 0.2.9, dsh-copilot-search 0.1.5, dsh-copilot-tool-schema 0.1.3, dsh-keys-manager 0.2.11. The other columns were not refreshed.
+- Limits: npm search does not find everything (`dsh-vendor-login` only turned up through GitHub), and GitHub's API rate limit cut some searches short, so a few plugins may be missing.
+- **Route ids:** downloaded the npm `latest` tarball of the 25 npm plugins in sections 2 to 4, shallow-cloned the 18 GitHub-only repos in sections 2 to 4, and read each one's `registerAdapter` calls and settings writes. Repeated six npm searches (`copilot keywords:cordis-plugin`, `dsh-copilot`, `dsh github copilot`, `copilot dsh-llm`, `copilot harness plugin`, `github copilot deepseek`) and one web search: no new Copilot model plugin turned up. Newer npm versions seen during this check: dsh-plugin-subscriptions 0.9.12, @goodandready/dsh-subscriptions 0.7.64, dsh-subscriptions 0.2.3, dsh-copilot-api 0.1.9, dsh-copilot-catalog 0.2.9, dsh-copilot-search 0.1.5, dsh-copilot-tool-schema 0.1.3, dsh-keys-manager 0.2.11. The other columns were not refreshed.
