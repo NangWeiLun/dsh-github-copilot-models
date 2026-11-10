@@ -1,0 +1,116 @@
+# Tests for every change (docs/cicd.md sections 2, 3 and 6).
+# Runs on pushes to main, on pull requests, once a day, by hand, and inside publish.yml.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+  schedule:
+    - cron: '17 1 * * *' # once a day, to catch a new DSH `next` early
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      release-dsh:
+        description: The DSH tag a release is made for (`latest` or `next`). A failure on the other tag does not fail the run.
+        type: string
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  title:
+    name: Pull request title
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the title against CONTRIBUTING.md
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          pattern='^(feat|fix|docs|refactor|test|ci|chore)!?: [^[:space:]]'
+          if [[ "$TITLE" =~ $pattern ]]; then
+            echo "Title follows CONTRIBUTING.md: $TITLE"
+          else
+            echo "::error title=Pull request title::Write the title as '<type>: <summary>' with a type from CONTRIBUTING.md (feat, fix, docs, refactor, test, ci, chore), for example 'fix: refuse a size above the prompt limit'. Got: $TITLE"
+            exit 1
+          fi
+
+  check:
+    name: Type-check, unit tests, build
+    # A title edit re-runs only the title check.
+    if: github.event_name != 'pull_request' || github.event.action != 'edited'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci
+      - run: npm run check
+
+  dsh-versions:
+    name: Resolve DSH latest and next
+    if: github.event_name != 'pull_request' || github.event.action != 'edited'
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.resolve.outputs.matrix }}
+    steps:
+      - id: resolve
+        run: |
+          set -euo pipefail
+          latest="$(npm view @deepseek-ai/dsh@latest version)"
+          next="$(npm view @deepseek-ai/dsh@next version)"
+          echo "DSH latest: $latest; DSH next: $next"
+          if [ "$latest" = "$next" ]; then
+            matrix="$(jq -cn --arg v "$latest" '{include: [{tags: "latest next", version: $v}]}')"
+          else
+            matrix="$(jq -cn --arg l "$latest" --arg n "$next" '{include: [{tags: "latest", version: $l}, {tags: "next", version: $n}]}')"
+          fi
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+
+  dsh:
+    name: DSH ${{ matrix.tags }} (${{ matrix.version }})
+    needs: dsh-versions
+    runs-on: ubuntu-latest
+    # In a release, only the DSH tag the release is made for must pass (docs/cicd.md section 4).
+    continue-on-error: ${{ inputs.release-dsh != '' && !contains(matrix.tags, inputs.release-dsh) }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.dsh-versions.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - run: npm ci
+      - name: Install DSH ${{ matrix.version }}
+        env:
+          DSH_VERSION: ${{ matrix.version }}
+        run: npm install --prefix "$RUNNER_TEMP/dsh" --ignore-scripts --no-audit --no-fund "@deepseek-ai/dsh@$DSH_VERSION"
+      - name: Contract tests (GitHub and Copilot faked, network blocked)
+        env:
+          DSH_INSTALL_DIR: ${{ runner.temp }}/dsh
+        run: npm run test:contract
+      - name: Install pnpm, which `dsh plugin` runs
+        run: npm install --global pnpm@12
+      - name: Package check (signed out, no request)
+        run: |
+          set -euo pipefail
+          export DSH_HOME="$RUNNER_TEMP/dsh-home"
+          dsh="$RUNNER_TEMP/dsh/node_modules/.bin/dsh"
+          version="$(node -p "require('./package.json').version")"
+          npm pack --pack-destination "$RUNNER_TEMP"
+          "$dsh" --profile ci --from-default-profile web --dump-config > /dev/null
+          "$dsh" plugin --profile ci add "$RUNNER_TEMP/dsh-github-copilot-models-$version.tgz"
+          "$dsh" --profile ci --dump-config > "$RUNNER_TEMP/dump.yml"
+          tail -n 3 "$RUNNER_TEMP/dump.yml"
+          grep -q 'id: github-copilot-models' "$RUNNER_TEMP/dump.yml"

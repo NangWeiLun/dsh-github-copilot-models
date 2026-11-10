@@ -1,6 +1,6 @@
 # CI/CD
 
-**Status:** proposed, not implemented. This document describes how the plugin is to be tested, released and published from GitHub Actions. Packaging, distribution and the DSH compatibility policy are in [packaging.md](packaging.md); manual tests are in [DEVELOPMENT.md](../DEVELOPMENT.md); the rules for pull requests are in [CONTRIBUTING.md](../CONTRIBUTING.md).
+**Status:** implemented in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml), [`.github/workflows/publish.yml`](../.github/workflows/publish.yml) and [`scripts/changelog.ts`](../scripts/changelog.ts); the one-time settings of section 7 are made by the maintainer. This document describes how the plugin is tested, released and published from GitHub Actions. Packaging, distribution and the DSH compatibility policy are in [packaging.md](packaging.md); manual tests are in [DEVELOPMENT.md](../DEVELOPMENT.md); the rules for pull requests are in [CONTRIBUTING.md](../CONTRIBUTING.md).
 
 ## 1. Principles
 
@@ -14,8 +14,8 @@
 
 | Workflow | Runs on | Does |
 |---|---|---|
-| `ci.yml` | Push to `main`, pull requests, once a day, manual start | The title check (section 6) on pull requests, and the test job (section 3) |
-| `publish.yml` | Push of a `v*` tag | The test job, then the publish job (section 4) |
+| `ci.yml` | Push to `main`, pull requests, once a day, manual start, and as the test job of `publish.yml` | The title check (section 6) on pull requests, and the test job (section 3). A title edit runs only the title check |
+| `publish.yml` | Push of a `v*` tag | A plan job (the tag matches `package.json`, the version is not on npm yet, the npm tag), the test job, then the publish job (section 4) |
 
 ```
 maintainer: npm version (writes CHANGELOG.md) → git push --follow-tags
@@ -37,8 +37,8 @@ The daily run of `ci.yml` is what finds a break early: when DSH publishes a `nex
 
 1. Choose the npm tag from the version: a plain version (`0.1.1`) publishes as `latest`; a preview version (`0.2.0-next.0`) publishes as `next`.
 2. Require the tests for the DSH the release is made for: DSH `latest` for a `latest` release, DSH `next` for a `next` release. A failure on the other DSH tag is reported but does not block the release.
-3. Run `npm publish --tag <tag>` through trusted publishing. npm adds provenance, because the repository and the package are public.
-4. Create a GitHub Release for the tag, with the version's section of `CHANGELOG.md` as its notes.
+3. Run `npm publish --tag <tag>` through trusted publishing, with the latest npm. npm adds provenance, because the repository and the package are public. The job sets no `registry-url` in `actions/setup-node`: the `.npmrc` it would write names a token, and any configured token, even an empty one, makes npm skip trusted publishing.
+4. Create a GitHub Release for the tag, with the version's section of `CHANGELOG.md` as its notes; a `next` release is marked as a pre-release.
 
 ## 5. Release channels
 
@@ -55,8 +55,9 @@ The daily run of `ci.yml` is what finds a break early: when DSH publishes a `nex
 ## 6. Release notes
 
 - **Pull request titles:** pull requests are squash-merged, so each title becomes one commit on `main`; the maintainer's direct commits use the same `<type>: <summary>` form. `ci.yml` rejects a pull request whose title does not follow [CONTRIBUTING.md](../CONTRIBUTING.md#pull-request-titles).
-- **CHANGELOG.md:** `npm version` runs the package's `version` script, which writes the new version's section from the commit subjects since the previous tag. `feat` goes under Features, `fix` under Fixes, and any type marked `!` under Breaking changes; the other types are left out. The section becomes part of the version commit, so the maintainer can edit it and amend the commit before pushing the tag.
-- **GitHub Release:** the publish job copies that section into the release for the tag.
+- **CHANGELOG.md:** `npm version` runs the package's `version` script, `node scripts/changelog.ts write`, which writes the new version's section from the commit subjects since the previous tag. `feat` goes under Features, `fix` under Fixes, and any type marked `!` under Breaking changes; the other types are left out, and a version without any of them reads "No changes to features or fixes." The section becomes part of the version commit, so the maintainer can edit it and amend the commit before pushing the tag. `node scripts/changelog.ts write --dry-run` prints the section without writing it.
+- **GitHub Release:** the publish job reads the section with `node scripts/changelog.ts notes <version>` and copies it into the release for the tag.
+- A unit test fails when `CHANGELOG.md` has no section for the version in `package.json`.
 - Contributors never edit `CHANGELOG.md`, so pull requests do not conflict on it.
 
 ## 7. Maintainer steps
@@ -72,12 +73,11 @@ git push --follow-tags origin main
 
 **Once:**
 
-1. Add `.github/workflows/ci.yml`, `publish.yml`, and the `version` script that writes `CHANGELOG.md`.
-2. On GitHub, under the repository's Settings → General → Pull Requests, allow squash merging only, with the pull request title as the default commit message.
-3. On GitHub, under the repository's Settings → Rules → Rulesets, add a tag ruleset for `v*` that restricts creations, updates and deletions, with the Repository admin role as the only bypass.
-4. On npmjs.com, under the package's Settings → Trusted publisher → GitHub Actions, enter `NangWeiLun`, `dsh-github-copilot-models` and `publish.yml`, and allow `npm publish`. This asks for the maintainer's npm login and 2FA.
-5. Complete the first publish from `publish.yml` within 2 days of step 4; an unused configuration expires.
-6. Then, under the package's Settings → Publishing access, select "Require two-factor authentication and disallow tokens".
+1. On GitHub, under the repository's Settings → General → Pull Requests, allow squash merging only, with the pull request title as the default commit message.
+2. On GitHub, under the repository's Settings → Rules → Rulesets, add a tag ruleset for `v*` that restricts creations, updates and deletions, with the Repository admin role as the only bypass.
+3. On npmjs.com, under the package's Settings → Trusted publisher → GitHub Actions, enter `NangWeiLun`, `dsh-github-copilot-models` and `publish.yml`, and allow `npm publish`. This asks for the maintainer's npm login and 2FA.
+4. Complete the first publish from `publish.yml` within 2 days of step 3; an unused configuration expires.
+5. Then, under the package's Settings → Publishing access, select "Require two-factor authentication and disallow tokens".
 
 ## 8. Limits
 

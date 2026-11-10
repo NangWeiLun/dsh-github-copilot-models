@@ -172,9 +172,10 @@ src/index.ts         Host entry: Config, routes, start-up lookup, the model rout
 src/host/            Login and Models controllers, host lookup, /models, pi-ai provider
 src/client/          the Card (settings section) and its text in src/client/locales/
 src/shared/api.ts    Card ↔ Host contract
-scripts/             build.mjs (esbuild, with an import check), dev-host.mjs
+scripts/             build.mjs (esbuild, with an import check), dev-host.mjs, changelog.ts (CHANGELOG.md at `npm version`)
 test/unit/           over fakes
 test/contract/       installed DSH and pi-ai, offline
+.github/workflows/   ci.yml (tests on DSH latest and next), publish.yml (release on a v* tag); see docs/cicd.md
 docs/                design/, packaging.md, cicd.md, todo.md, study/
 lib/, .tmp/          build output; web-dev log and start folder (git-ignored)
 ```
