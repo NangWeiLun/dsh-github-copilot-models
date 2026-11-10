@@ -1,8 +1,16 @@
 {
   "name": "dsh-github-copilot-models",
   "version": "0.0.0",
-  "private": true,
   "description": "GitHub Copilot for DeepSeek Harness: sign in by browser device code or a personal access token, and use the models of your Copilot account.",
+  "keywords": [
+    "dsh",
+    "deepseek-harness",
+    "dsh-plugin",
+    "github-copilot",
+    "copilot",
+    "llm",
+    "model-provider"
+  ],
   "homepage": "https://github.com/NangWeiLun/dsh-github-copilot-models#readme",
   "bugs": {
     "url": "https://github.com/NangWeiLun/dsh-github-copilot-models/issues"
@@ -48,6 +56,7 @@
     "test": "node --test \"test/unit/**/*.test.ts\"",
     "test:contract": "node --test --test-concurrency=1 \"test/contract/**/*.test.ts\"",
     "check": "npm run typecheck && npm test && npm run build",
+    "prepublishOnly": "npm run check",
     "prepack": "npm run build",
     "dev:host": "node scripts/dev-host.mjs"
   },

@@ -25,14 +25,11 @@ Use the models of your GitHub Copilot account in [DeepSeek Harness](https://www.
 
 ## 📦 Install
 
-Not published on npm yet. Install from a checkout:
-
 ```sh
-npm install && npm run build
-npx -- @deepseek-ai/dsh plugin --profile <profile> add /absolute/path/to/dsh-github-copilot-models
+npx -- @deepseek-ai/dsh plugin --profile <profile> add dsh-github-copilot-models
 ```
 
-`<profile>` is the DSH profile to install into, for example `web`. Then restart DSH.
+`<profile>` is the DSH profile to install into, for example `web`. Then restart DSH. To install from a checkout instead, see [DEVELOPMENT.md](DEVELOPMENT.md#3-profiles).
 
 ## 🚀 Use
 

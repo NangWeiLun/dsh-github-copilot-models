@@ -53,7 +53,7 @@ The plugin now requires DSH `>=0.2.2-rc.1 <0.3.0-0` (`engines.dsh` in `package.j
 | npm package | `dsh-github-copilot-models`, the same as the repository. Both it and `github-copilot-models` were free on npm on 2026-11-01 | Decided 2026-11-01 |
 | Display name in the picker | "GitHub Copilot (plugin)", because DSH's built-in route is named "GitHub Copilot" ([models.md](models.md) A8) | Decided 2026-11-03 |
 
-The route id matches the repository name without the `dsh-` prefix. Revisit whether the name suits the repository and the npm package before the first release. Renaming the route id later forces users to re-pick their default model, because DSH saves the route id with it.
+The route id matches the repository name without the `dsh-` prefix. Renaming the route id later forces users to re-pick their default model, because DSH saves the route id with it.
 
 ## Route id
 

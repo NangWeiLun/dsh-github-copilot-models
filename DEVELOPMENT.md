@@ -54,7 +54,7 @@ npx -- @deepseek-ai/dsh plugin --profile <name> add /absolute/path/to/dsh-github
 
 This checks `engines.dsh`, runs `pnpm add`, records a `link:` dependency and appends the bundle. pnpm's warning about missing peer dependencies is expected: DSH supplies the peers at run time.
 
-**Switching from npm** (the plugin is not on npm yet): `dsh plugin add <folder>` replaces an npm copy, while the Plugins page and the agent's `plugin_manager` refuse with "already installed". Back to npm: `dsh plugin --profile <name> remove dsh-github-copilot-models`, then `dsh plugin --profile <name> add dsh-github-copilot-models`, then restart that DSH. The login stays; the plugin's settings should too (not tested). Before a change that could break a profile with the local link, see the breaking-change rule in [AGENTS.md](AGENTS.md).
+**Switching from npm:** `dsh plugin add <folder>` replaces an npm copy, while the Plugins page and the agent's `plugin_manager` refuse with "already installed". Back to npm: `dsh plugin --profile <name> remove dsh-github-copilot-models`, then `dsh plugin --profile <name> add dsh-github-copilot-models`, then restart that DSH. The login stays; the plugin's settings should too (not tested). Before a change that could break a profile with the local link, see the breaking-change rule in [AGENTS.md](AGENTS.md).
 
 ### Create the `web-dev` profile
 
@@ -141,13 +141,24 @@ npm run dev:host -- refresh                # 2 requests
 npm run dev:host -- sign-out leak-check    # no request; counts the PAT in the DSH log (expect 0)
 ```
 
-**First-run acceptance test**, before a release, on a fresh separate profile:
+**Release test**, before each release. It installs the packed tarball, as users get it, in a throwaway DSH home on port 3082, so the test starts signed out and your own login and profiles stay untouched. From this folder (from a shell inside DSH, add the `env -u …` prefix of section 4):
 
-1. Install the plugin. The Card shows Sign in; sign in with a browser code.
+```sh
+mkdir -p .tmp/accept-cwd && npm pack --pack-destination .tmp   # builds; writes .tmp/dsh-github-copilot-models-<version>.tgz
+ACCEPT_HOME="$PWD/.tmp/accept-home"
+DSH_HOME="$ACCEPT_HOME" npx -- @deepseek-ai/dsh --profile accept --from-default-profile web --dump-config > /dev/null
+DSH_HOME="$ACCEPT_HOME" npx -- @deepseek-ai/dsh plugin --profile accept add "$PWD/.tmp/dsh-github-copilot-models-<version>.tgz"
+cd .tmp/accept-cwd
+DSH_HOME="$ACCEPT_HOME" npx -- @deepseek-ai/dsh --profile accept --port 3082 --no-open > ../accept.log 2>&1
+```
+
+1. Open the launch URL in `.tmp/accept.log`. The Card shows Sign in. Sign in once, with a browser code or with the PAT (from this folder, in a second terminal: `npm run dev:host -- --log .tmp/accept.log save-pat`).
 2. The account's models appear in the chat picker, with no visit to Settings → Models and no blank API key.
 3. Send a request that streams and calls a tool.
-4. Sign out: the plugin's models leave the picker. Sign in again: the picker recovers without a restart.
-5. Repeat with a PAT, and switch from one method to the other.
+4. Sign out: the plugin's models leave the picker. `npm run dev:host -- --log .tmp/accept.log leak-check` reports 0.
+5. Stop DSH, then delete `.tmp/accept-home`, `.tmp/accept-cwd`, `.tmp/accept.log` and the tarball.
+
+**Full login test**, when the login code changes, or DSH changes its `authorization` or `credentials` services: in the same setup, also sign in again after step 4 (the picker recovers without a restart), repeat steps 2 to 4 with the other method, and switch from one method to the other in both directions.
 
 **Why DSH must not start from this folder.** A booting DSH loads `.env` from the folder it starts in and from `~/.dsh/.env`. pi-ai falls back to `COPILOT_GITHUB_TOKEN` whenever no login is stored (login.md B6), so a DSH started here would hand your PAT to its built-in GitHub Copilot route, and sign-out would report the token as still set. Config dumps and `dsh plugin` do not load `.env`.
 
